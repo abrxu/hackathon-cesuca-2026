@@ -12,6 +12,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Deploy na VPS
         env:
@@ -33,13 +34,4 @@ jobs:
           DEEPSEEK_MODEL=deepseek-flash
           ENV
           sed -i 's/^ *//' deploy.env
-          ssh -i ~/.ssh/deploy "$SSH_USER@$SSH_HOST" "$GITHUB_SHA" < deploy.env
-
-      - name: Health check
-        run: |
-          for i in $(seq 1 30); do
-            # Direto na origem: a Cloudflare responde 403 para IPs do GitHub Actions.
-            curl -fsS --resolve "hackathon.abrxu.com:443:${{ secrets.DEPLOY_HOST }}" https://hackathon.abrxu.com/api/health && exit 0
-            sleep 5
-          done
-          exit 1
+          ssh -o ConnectTimeout=20 -o ServerAliveInterval=30 -i ~/.ssh/deploy "$SSH_USER@$SSH_HOST" "$GITHUB_SHA" < deploy.env
