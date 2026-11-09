@@ -86,9 +86,18 @@ async def generic_handler(request: Request, exc: Exception):
 
 @app.get("/api/health")
 def health():
-    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
-        version = conn.execute("SELECT version()").fetchone()[0]
-    return {"status": "ok", "db": version}
+    try:
+        with psycopg.connect(os.environ["DATABASE_URL"], connect_timeout=3) as conn:
+            db = conn.execute("SELECT version()").fetchone()[0]
+    except Exception:
+        db = None
+    carga_ok = getattr(app.state, "store", None) is not None
+    return {
+        "status": "ok" if (db and carga_ok) else "degradado",
+        "db": db,
+        "dados_carregados": carga_ok,
+        "erro_carga": getattr(app.state, "load_error", None),
+    }
 
 
 for _r in ROUTERS:

@@ -71,8 +71,8 @@ def acao_stream(cliente_id: str, body: Optional[AcaoIn] = None, _: dict = Depend
 
 
 @router.post("/clientes/{cliente_id}/contato")
-def contato(cliente_id: str, body: Optional[ContatoIn] = None, _: dict = Depends(current_user),
+def contato(cliente_id: str, body: Optional[ContatoIn] = None, usuario: dict = Depends(current_user),
             store=Depends(get_store)):
     cliente_ou_404(store, cliente_id)
-    quando = store.marcar_contato(cliente_id, (body.observacao if body else None))
-    return {"cliente_id": cliente_id, "contatado_em": quando.isoformat(timespec="seconds")}
+    quando = store.marcar_contato(cliente_id, (body.observacao if body else None), usuario)
+    return {"cliente_id": cliente_id, "contatado_em": quando.isoformat(timespec="seconds"), "contatado_por": usuario.get("nome")}

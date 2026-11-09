@@ -44,6 +44,7 @@ class Store:
         self.riscos = riscos
         self.database_url = database_url if database_url is not None else os.environ.get("DATABASE_URL")
         self.contatos: dict[str, datetime] = {}
+        self.contatos_por: dict[str, str] = {}
         self.ref = max((a.data_abertura for a in ds.atendimentos if a.data_abertura), default=datetime.now())
         self._at_por_cliente: dict[str, list] = {}
         for a in ds.atendimentos:
@@ -90,6 +91,7 @@ class Store:
             "pendentes": r.pendentes,
             "satisfacao_media": r.satisfacao_media,
             "contatado_em": _iso(self.contatos.get(cid)),
+            "contatado_por": self.contatos_por.get(cid),
         }
 
     def cliente_detalhe(self, cid) -> dict:
@@ -119,6 +121,7 @@ class Store:
             ],
             "atendimentos": [self.atendimento_dict(a) for a in self.atendimentos_de(cid)],
             "contatado_em": _iso(self.contatos.get(cid)),
+            "contatado_por": self.contatos_por.get(cid),
         }
 
     # ---------- listagem ----------
@@ -266,17 +269,19 @@ class Store:
         return out
 
     # ---------- contato ----------
-    def marcar_contato(self, cid, observacao=None) -> datetime:
+    def marcar_contato(self, cid, observacao=None, usuario=None) -> datetime:
         agora = datetime.now().replace(microsecond=0)
         self.contatos[cid] = agora
+        if usuario:
+            self.contatos_por[cid] = usuario.get("nome")
         if self.database_url:
             try:
                 import psycopg
 
                 with psycopg.connect(self.database_url, connect_timeout=3) as conn:
                     conn.execute(
-                        "INSERT INTO contatos (cliente_id, contatado_em, observacao) VALUES (%s, %s, %s)",
-                        (cid, agora, observacao),
+                        "INSERT INTO contatos (cliente_id, contatado_em, observacao, usuario_id) VALUES (%s, %s, %s, %s)",
+                        (cid, agora, observacao, (usuario or {}).get("id")),
                     )
             except Exception as e:  # nunca derruba a rota
                 log.warning("falha ao gravar contato no banco: %s", e)
