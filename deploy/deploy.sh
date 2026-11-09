@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Forced command da chave do GitHub Actions (~/.ssh/authorized_keys na VPS).
+# Aceita só "<sha de 40 caracteres>" de um commit que esteja na origin/main.
+set -euo pipefail
+cd /opt/hackathon
+
+sha="${SSH_ORIGINAL_COMMAND:-}"
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "uso: <sha de 40 caracteres>" >&2; exit 2; }
+
+exec 9>/tmp/hackathon-deploy.lock
+flock 9
+
+# O workflow manda o .env (montado a partir dos secrets do repositório) pelo stdin.
+tmp=$(mktemp /opt/hackathon/.env.XXXX)
+cat > "$tmp"
+if grep -q '^POSTGRES_PASSWORD=.' "$tmp" && grep -q '^JWT_SECRET=.' "$tmp"; then
+  chmod 600 "$tmp" && mv "$tmp" .env
+else
+  rm -f "$tmp"
+fi
+
+echo "==> deploy @ $sha"
+git -C src fetch --quiet origin main
+git -C src merge-base --is-ancestor "$sha" origin/main \
+  || { echo "commit $sha não está na origin/main" >&2; exit 3; }
+git -C src checkout --quiet --force "$sha"
+
+docker compose -f src/deploy/compose.prod.yml --env-file .env up -d --build --remove-orphans
+docker image prune -f >/dev/null
+docker compose -f src/deploy/compose.prod.yml --env-file .env ps

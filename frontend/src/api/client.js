@@ -1,7 +1,7 @@
 import * as mock from "./mock.js";
 import { ApiError } from "./errors.js";
 
-const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000") + "/api";
+const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "/api";
 
 const storage = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -31,6 +31,12 @@ async function request(method, path, body, fallback) {
     return fallback();
   }
   if ([404, 405, 501].includes(res.status) && !(await isContractError(res.clone()))) return fallback();
+  if (res.status === 401 && path !== "/auth/login") {
+    // Token ausente, expirado ou do login de exemplo: volta para a tela de entrada.
+    storage.set("radar.token", null);
+    storage.set("radar.usuario", null);
+    if (window.location.pathname !== "/login") window.location.assign("/login");
+  }
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     throw new ApiError(data?.erro?.codigo ?? "erro_interno", data?.erro?.mensagem ?? "Não foi possível carregar os dados.", res.status);

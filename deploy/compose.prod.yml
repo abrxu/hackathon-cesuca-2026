@@ -1,0 +1,57 @@
+# Produção (VPS integrator-vps, hackathon.abrxu.com). Sem portas publicadas:
+# o Caddy (rede classbuddy_internal) faz o proxy para hackathon-frontend / hackathon-backend.
+name: hackathon
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hackathon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [default]
+
+  backend:
+    build: ../backend
+    container_name: hackathon-backend
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      CORS_ORIGIN: https://hackathon.abrxu.com
+      DATA_DIR: /data
+      JWT_SECRET: ${JWT_SECRET}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}
+    volumes:
+      - "../docs-hackathon/Arquivos de trabalho:/data:ro"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [default, proxy]
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../deploy/frontend.Dockerfile
+    container_name: hackathon-frontend
+    restart: unless-stopped
+    depends_on: [backend]
+    networks: [proxy]
+
+volumes:
+  pgdata:
+
+networks:
+  proxy:
+    name: classbuddy_internal
+    external: true
