@@ -69,14 +69,14 @@ export default function Clientes() {
       </PageHeader>
 
       <div className="mb-3 flex flex-wrap items-end gap-3">
-        <label className="flex min-w-64 flex-1 flex-col gap-1 text-xs text-ink-soft">
+        <label className="flex min-w-64 flex-1 flex-col gap-1 text-sm font-semibold text-ink">
           Buscar
           <input
             type="search"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Nome do cliente ou código (C037)"
-            className="h-9 rounded-md border border-line bg-surface px-3 text-sm text-ink"
+            className="h-10 rounded-control border border-ink bg-surface px-3 text-sm font-normal text-ink"
           />
         </label>
         {CAMPOS.map((c) => (
@@ -93,7 +93,7 @@ export default function Clientes() {
         {ativos.length > 0 && data && <span className="text-ink-soft">{data.total} resultados</span>}
       </div>
 
-      <div className="overflow-x-auto rounded-lg bg-surface">
+      <div className="overflow-x-auto rounded-panel border border-ink bg-surface">
         {error ? (
           <ErrorState error={error} onRetry={reload} />
         ) : loading && !data ? (
@@ -106,28 +106,28 @@ export default function Clientes() {
           />
         ) : (
           <table className={`w-full min-w-[960px] text-sm ${loading ? "opacity-60" : ""}`}>
-            <thead className="border-b border-line text-left text-xs text-ink-faint">
+            <thead className="border-b border-ink bg-canvas text-left text-sm text-ink-soft">
               <tr>
                 <Th onClick={() => ordenarPor("nome")} ativo={filtros.ordenar === "nome"} dir={filtros.direcao}>Cliente</Th>
-                <th className="px-3 py-3 font-medium">Setor</th>
-                <th className="px-3 py-3 font-medium">Cidade</th>
+                <th className="px-3 py-3 font-semibold">Setor</th>
+                <th className="px-3 py-3 font-semibold">Cidade</th>
                 <Th onClick={() => ordenarPor("score")} ativo={!filtros.ordenar || filtros.ordenar === "score" || filtros.ordenar === "prioridade"} dir={filtros.direcao}>Score</Th>
-                <th className="px-3 py-3 font-medium">Faixa</th>
-                <th className="px-3 py-3 font-medium">Perfil</th>
-                <th className="px-3 py-3 font-medium">Uso jul–set</th>
-                <th className="px-3 py-3 text-right font-medium">Pendentes</th>
-                <th className="px-3 py-3 text-right font-medium">Nota</th>
+                <th className="px-3 py-3 font-semibold">Faixa</th>
+                <th className="px-3 py-3 font-semibold">Perfil</th>
+                <th className="px-3 py-3 font-semibold">Uso jul–set</th>
+                <th className="px-3 py-3 text-right font-semibold">Pendentes</th>
+                <th className="px-3 py-3 text-right font-semibold">Nota</th>
                 <th className="px-5 py-3"><span className="sr-only">Abrir</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {data.itens.map((c) => (
-                <tr key={c.cliente_id} className="hover:bg-canvas">
+                <tr key={c.cliente_id} className="hover:bg-brand-soft">
                   <td className="px-5 py-2.5">
                     <Link to={`/clientes/${c.cliente_id}`} className="font-semibold hover:underline">{c.nome}</Link>
-                    <span className="block text-xs text-ink-faint">
+                    <span className="block text-xs text-ink-soft">
                       {c.cliente_id}
-                      {c.contatado_em && <span className="ml-2 font-semibold text-risk-saudavel">contatado</span>}
+                      {c.contatado_em && <span className="ml-2 font-semibold text-ink"><span className="text-risk-saudavel" aria-hidden>● </span>contatado</span>}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-ink-soft">{c.setor}</td>
@@ -139,7 +139,7 @@ export default function Clientes() {
                   <td className="px-3 py-2.5 text-right">{fmt.num(c.pendentes)}</td>
                   <td className="px-3 py-2.5 text-right">{fmt.nota(c.satisfacao_media)}</td>
                   <td className="px-5 py-2.5 text-right">
-                    <Link to={`/clientes/${c.cliente_id}`} className="text-sm font-medium text-brand hover:underline">Abrir</Link>
+                    <Link to={`/clientes/${c.cliente_id}`} className="text-sm font-semibold text-ink underline underline-offset-4 hover:no-underline">Abrir</Link>
                   </td>
                 </tr>
               ))}
@@ -153,7 +153,7 @@ export default function Clientes() {
 
 function Th({ children, onClick, ativo, dir }) {
   return (
-    <th className="px-3 py-3 font-medium first:px-5" aria-sort={ativo ? (dir === "asc" ? "ascending" : "descending") : "none"}>
+    <th className="px-3 py-3 font-semibold first:px-5" aria-sort={ativo ? (dir === "asc" ? "ascending" : "descending") : "none"}>
       <button type="button" onClick={onClick} className={`inline-flex items-center gap-1 hover:text-ink ${ativo ? "text-ink" : ""}`}>
         {children}
         {ativo && <span aria-hidden>{dir === "asc" ? "↑" : "↓"}</span>}

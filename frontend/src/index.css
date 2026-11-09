@@ -1,50 +1,67 @@
-@import "@fontsource-variable/archivo/wdth.css";
 @import "tailwindcss";
 
 /*
-  Tokens provisórios do Radar de Clientes.
-  Quando o design system chegar em frontend/design, trocar os valores aqui
-  e o visual dos componentes em src/components/ui.jsx.
+  Tokens do Radar de Clientes, extraídos do manual de identidade visual
+  (frontend/design/miv-ofc.pdf) e complementados por radar-miv-design-system.html.
+  Paleta oficial: sete HEX. Os tons "soft", "ink-soft" e "line" são derivados
+  por color-mix dessas mesmas cores (não há HEX novos).
 */
 @theme {
-  --font-sans: "Archivo Variable", system-ui, sans-serif;
+  --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 
-  --color-ink: #18202e;
-  --color-ink-soft: #4a5468;
-  --color-ink-faint: #7a8396;
-  --color-canvas: #eceff3;
-  --color-surface: #ffffff;
-  --color-line: #d5dae2;
+  /* Paleta oficial */
+  --color-ink: #0F172A;        /* Contraste: texto, títulos, bordas funcionais, foco, ação primária */
+  --color-canvas: #F8FAFC;     /* Fundo e box */
+  --color-surface: #FDFEFF;    /* Hover em box / superfície clara */
+  --color-risk-alto: #DC2626;
+  --color-risk-atencao: #D97706;
+  --color-risk-saudavel: #059669;
+  --color-ai: #4F46E5;         /* Copiloto / IA */
 
-  --color-brand: #2b3a67;
-  --color-brand-soft: #e3e7f2;
+  /* Derivados (mistura das cores oficiais) */
+  --color-ink-soft: color-mix(in srgb, #0F172A 80%, #F8FAFC);
+  --color-ink-faint: color-mix(in srgb, #0F172A 64%, #F8FAFC);
+  --color-line: color-mix(in srgb, #0F172A 20%, #F8FAFC);
 
-  --color-risk-alto: #b42318;
-  --color-risk-alto-soft: #fbe5e2;
-  --color-risk-atencao: #a15c07;
-  --color-risk-atencao-soft: #fcefd9;
-  --color-risk-saudavel: #2e7d4f;
-  --color-risk-saudavel-soft: #e1f2e7;
+  /* Ação primária = azul-noite */
+  --color-brand: #0F172A;
+  --color-brand-soft: color-mix(in srgb, #0F172A 8%, #F8FAFC);
 
-  --color-ai: #6941c6;
-  --color-ai-soft: #f1ecfc;
+  --color-risk-alto-soft: color-mix(in srgb, #DC2626 10%, #FDFEFF);
+  --color-risk-atencao-soft: color-mix(in srgb, #D97706 12%, #FDFEFF);
+  --color-risk-saudavel-soft: color-mix(in srgb, #059669 10%, #FDFEFF);
+  --color-ai-soft: color-mix(in srgb, #4F46E5 7%, #FDFEFF);
 
+  /* Escala tipográfica: metadado 13, rótulo 14, corpo 16, subtítulo 18, seção 22, título 28-40 */
   --text-xs: 13px;
   --text-sm: 14px;
-  --text-base: 15px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+
+  /* Raios */
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
 }
 
 @layer base {
   html {
-    font-size: 15px;
+    font-size: 16px;
   }
   body {
     @apply bg-canvas text-ink font-sans antialiased;
+    line-height: 1.5;
     font-variant-numeric: tabular-nums;
   }
+  h1, h2, h3 {
+    line-height: 1.2;
+  }
   :focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: 2px;
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px var(--color-surface);
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -54,11 +71,12 @@
   }
 }
 
+/* Números de destaque (KPIs e score): peso forte, tabulares. */
 @utility font-display {
-  font-stretch: 125%;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes entrar {

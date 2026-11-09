@@ -68,19 +68,19 @@ export default function AcaoSugerida({ cliente, contato, onContatado, onClose })
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="acao-titulo">
-      <button type="button" className="absolute inset-0 bg-ink/30" aria-label="Fechar" tabIndex={-1} onClick={onClose} />
-      <aside className="relative flex h-full w-full max-w-[560px] flex-col bg-surface shadow-2xl motion-safe:animate-[entrar_200ms_ease-out]">
-        <header className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
-          <h2 id="acao-titulo" className="text-lg font-bold">
+      <button type="button" className="absolute inset-0 bg-ink/40" aria-label="Fechar" tabIndex={-1} onClick={onClose} />
+      <aside className="relative flex h-full w-full max-w-[560px] flex-col border-l border-ink bg-surface shadow-2xl">
+        <header className="flex items-start justify-between gap-4 border-b border-ink px-6 py-5">
+          <h2 id="acao-titulo" className="text-xl font-bold">
             <span className="text-ai" aria-hidden>✦ </span>
             Ação sugerida para {cliente.nome}
           </h2>
-          <button ref={fecharRef} type="button" onClick={onClose} className="rounded-md px-2 py-1 text-ink-faint hover:text-ink" aria-label="Fechar painel">
+          <button ref={fecharRef} type="button" onClick={onClose} className="rounded-control border border-ink px-2.5 py-1 text-ink hover:bg-brand-soft" aria-label="Fechar painel">
             ✕
           </button>
         </header>
 
-        <div className="flex gap-1 border-b border-line px-6" role="tablist" aria-label="Formato">
+        <div className="flex gap-1 border-b border-ink px-6" role="tablist" aria-label="Formato">
           {FORMATOS.map((f) => (
             <button
               key={f}
@@ -88,7 +88,7 @@ export default function AcaoSugerida({ cliente, contato, onContatado, onClose })
               role="tab"
               aria-selected={formato === f}
               onClick={() => setFormato(f)}
-              className={`-mb-px border-b-2 px-3 py-3 text-sm font-semibold ${formato === f ? "border-ai text-ai" : "border-transparent text-ink-soft hover:text-ink"}`}
+              className={`-mb-px border-b-[3px] px-3 py-3 text-base font-bold ${formato === f ? "border-ai text-ai" : "border-transparent text-ink-soft hover:text-ink"}`}
             >
               {FORMATO_LABEL[f]}
             </button>
@@ -112,7 +112,7 @@ export default function AcaoSugerida({ cliente, contato, onContatado, onClose })
             </div>
           ) : (
             <AiBlock fonte={d.fonte}>
-              <div className="space-y-4 text-[15px] leading-relaxed">
+              <div className="space-y-4 text-base leading-relaxed">
                 <p><span className="font-semibold">Resumo: </span>{d.resumo || fmt.dash}</p>
                 <p><span className="font-semibold">Próximo passo: </span>{d.proximo_passo || fmt.dash}</p>
                 <div>
@@ -125,18 +125,18 @@ export default function AcaoSugerida({ cliente, contato, onContatado, onClose })
             </AiBlock>
           )}
           {d?.baseado_em && (
-            <p className="mt-4 text-xs text-ink-faint">
+            <p className="mt-4 text-xs text-ink-soft">
               Baseado em {fmt.num(d.baseado_em.atendimentos)} chamados, {fmt.num(d.baseado_em.meses_de_uso)} meses de uso e cadastro do cliente.
             </p>
           )}
         </div>
 
-        <footer className="flex flex-wrap items-center gap-2 border-t border-line px-6 py-4">
+        <footer className="flex flex-wrap items-center gap-2 border-t border-ink px-6 py-4">
           <Button variant="primary" onClick={copiar} disabled={!d}>{copiado ? "Roteiro copiado" : "Copiar roteiro"}</Button>
           <Button onClick={() => setTentativa((t) => t + 1)} disabled={estado.loading}>Gerar de novo</Button>
           <span className="ml-auto">
             {contato?.contatado_em ? (
-              <span className="text-sm font-semibold text-risk-saudavel">{`Contatado${contato.contatado_por ? ` por ${contato.contatado_por}` : ""} em ${fmt.data(contato.contatado_em)}`}</span>
+              <span className="text-sm font-bold text-ink"><span className="text-risk-saudavel" aria-hidden>● </span>{`Contatado${contato.contatado_por ? ` por ${contato.contatado_por}` : ""} em ${fmt.data(contato.contatado_em)}`}</span>
             ) : (
               <Button variant="ghost" onClick={marcarContatado} disabled={marcando}>
                 {marcando ? "Marcando…" : "Marcar como contatado"}

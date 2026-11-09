@@ -7,8 +7,8 @@ const SERVICOS = ["Sistema Alfa", "Sistema Beta", "Portal Web", "Aplicativo Mobi
 const ASSUNTOS = ["Acesso e senha", "Atualização", "Dúvida de utilização", "Erro no sistema", "Instalação", "Lentidão", "Relatório", "Solicitação de melhoria"];
 const CANAIS = ["E-mail", "Portal", "Telefone", "WhatsApp"];
 const SUGERIDA_CLASSES = {
-  "Crítica": "bg-risk-alto text-white",
-  Alta: "bg-risk-atencao-soft text-risk-atencao",
+  "Crítica": "bg-risk-alto text-canvas",
+  Alta: "bg-risk-atencao text-ink",
   Normal: "text-ink-soft",
 };
 
@@ -34,7 +34,7 @@ export default function Fila() {
       />
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
-        <div className="inline-flex rounded-md border border-line bg-surface p-0.5" role="radiogroup" aria-label="Ordem da fila">
+        <div className="inline-flex rounded-control border border-ink bg-surface p-0.5" role="radiogroup" aria-label="Ordem da fila">
           {[["inteligente", "Ordem inteligente"], ["chegada", "Ordem de chegada"]].map(([v, l]) => (
             <button
               key={v}
@@ -42,7 +42,7 @@ export default function Fila() {
               role="radio"
               aria-checked={ordem === v}
               onClick={() => atualizar("ordem", v === "inteligente" ? undefined : v)}
-              className={`rounded px-3.5 py-1.5 text-sm font-semibold ${ordem === v ? "bg-brand text-white" : "text-ink-soft hover:text-ink"}`}
+              className={`min-h-9 rounded-[0.375rem] px-3.5 py-1.5 text-sm font-bold ${ordem === v ? "bg-ink text-canvas" : "text-ink hover:underline"}`}
             >
               {l}
             </button>
@@ -53,7 +53,7 @@ export default function Fila() {
         <Select label="Canal" value={filtros.canal} onChange={(v) => atualizar("canal", v)} options={CANAIS} />
       </div>
 
-      <div className="overflow-x-auto rounded-lg bg-surface">
+      <div className="overflow-x-auto rounded-panel border border-ink bg-surface">
         {error ? (
           <ErrorState error={error} onRetry={reload} />
         ) : loading && !data ? (
@@ -66,17 +66,17 @@ export default function Fila() {
           />
         ) : (
           <table className={`w-full min-w-[1080px] text-sm ${loading ? "opacity-60" : ""}`}>
-            <thead className="border-b border-line text-left text-xs text-ink-faint">
+            <thead className="border-b border-ink bg-canvas text-left text-sm text-ink-soft">
               <tr>
-                <th className="py-3 pl-5 pr-3 font-medium">Posição</th>
-                <th className="px-3 py-3 font-medium">Chamado</th>
-                <th className="px-3 py-3 font-medium">Cliente</th>
-                <th className="px-3 py-3 font-medium">Assunto</th>
-                <th className="px-3 py-3 font-medium">Serviço</th>
-                <th className="px-3 py-3 font-medium">Informada</th>
-                <th className="px-3 py-3 font-medium">Sugerida</th>
-                <th className="px-3 py-3 text-right font-medium">Aberto há</th>
-                <th className="py-3 pl-3 pr-5 font-medium">Por que subiu</th>
+                <th className="py-3 pl-5 pr-3 font-semibold">Posição</th>
+                <th className="px-3 py-3 font-semibold">Chamado</th>
+                <th className="px-3 py-3 font-semibold">Cliente</th>
+                <th className="px-3 py-3 font-semibold">Assunto</th>
+                <th className="px-3 py-3 font-semibold">Serviço</th>
+                <th className="px-3 py-3 font-semibold">Informada</th>
+                <th className="px-3 py-3 font-semibold">Sugerida</th>
+                <th className="px-3 py-3 text-right font-semibold">Aberto há</th>
+                <th className="py-3 pl-3 pr-5 font-semibold">Por que subiu</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -84,18 +84,18 @@ export default function Fila() {
                 const a = it.atendimento;
                 const diverge = it.prioridade_sugerida !== a.prioridade;
                 return (
-                  <tr key={a.atendimento_id} className="hover:bg-canvas">
+                  <tr key={a.atendimento_id} className="hover:bg-brand-soft">
                     <td className="py-2.5 pl-5 pr-3 font-semibold">{it.posicao}</td>
                     <td className="px-3 py-2.5 text-ink-soft">{a.atendimento_id}</td>
                     <td className="px-3 py-2.5">
                       <Link to={`/clientes/${it.cliente.cliente_id}`} className="font-semibold hover:underline">{it.cliente.nome}</Link>
-                      <span className={`ml-2 text-xs font-bold ${faixaClasses(it.cliente.faixa).text}`}>{fmt.num(it.cliente.score)}</span>
+                      <span className={`ml-2 rounded-full px-1.5 py-px text-xs font-bold ${faixaClasses(it.cliente.faixa).bg} ${faixaClasses(it.cliente.faixa).on}`}>{fmt.num(it.cliente.score)}</span>
                     </td>
                     <td className="px-3 py-2.5">{a.assunto}</td>
                     <td className="px-3 py-2.5 text-ink-soft">{a.servico}</td>
                     <td className="px-3 py-2.5 text-ink-soft">{a.prioridade}</td>
                     <td className="px-3 py-2.5">
-                      <span className={`rounded px-2 py-0.5 text-xs font-semibold ${diverge ? SUGERIDA_CLASSES[it.prioridade_sugerida] : "text-ink-soft"}`}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${diverge ? SUGERIDA_CLASSES[it.prioridade_sugerida] : "text-ink-soft"}`}>
                         {it.prioridade_sugerida}
                       </span>
                     </td>

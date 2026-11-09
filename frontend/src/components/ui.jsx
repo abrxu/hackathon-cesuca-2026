@@ -1,13 +1,15 @@
-// Componentes visuais do protótipo. Quando o design system chegar em frontend/design,
-// adaptar aqui; as telas só usam estes componentes e os tokens de src/index.css.
+// Componentes visuais do Radar, seguindo o manual de identidade visual (frontend/design).
+// As telas só usam estes componentes e os tokens de src/index.css.
 import { useEffect, useState } from "react";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
 
+// Manual: vermelho sobre fundo claro passa AA; âmbar e verde só como marca gráfica,
+// com rótulo em azul-noite (on). Símbolo + texto reforçam a leitura sem depender da cor.
 const FAIXA_CLASSES = {
-  alto: { text: "text-risk-alto", bg: "bg-risk-alto", soft: "bg-risk-alto-soft" },
-  atencao: { text: "text-risk-atencao", bg: "bg-risk-atencao", soft: "bg-risk-atencao-soft" },
-  saudavel: { text: "text-risk-saudavel", bg: "bg-risk-saudavel", soft: "bg-risk-saudavel-soft" },
+  alto: { text: "text-risk-alto", bg: "bg-risk-alto", soft: "bg-risk-alto-soft", on: "text-canvas", simbolo: "▲" },
+  atencao: { text: "text-risk-atencao", bg: "bg-risk-atencao", soft: "bg-risk-atencao-soft", on: "text-ink", simbolo: "◆" },
+  saudavel: { text: "text-risk-saudavel", bg: "bg-risk-saudavel", soft: "bg-risk-saudavel-soft", on: "text-ink", simbolo: "●" },
 };
 export const faixaClasses = (faixa) => FAIXA_CLASSES[faixa] ?? FAIXA_CLASSES.saudavel;
 
@@ -15,8 +17,8 @@ export const faixaClasses = (faixa) => FAIXA_CLASSES[faixa] ?? FAIXA_CLASSES.sau
 export function RiskPill({ faixa }) {
   const c = faixaClasses(faixa);
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${c.soft} ${c.text}`}>
-      <span className={`size-1.5 rounded-full ${c.bg}`} aria-hidden />
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-sm font-bold whitespace-nowrap ${c.bg} ${c.on}`}>
+      <span className="text-[0.7em]" aria-hidden>{c.simbolo}</span>
       {FAIXA_LABEL[faixa] ?? fmt.dash}
     </span>
   );
@@ -25,7 +27,7 @@ export function RiskPill({ faixa }) {
 export function PerfilPill({ perfil }) {
   if (!perfil) return <span className="text-ink-faint">{fmt.dash}</span>;
   return (
-    <span className="inline-flex rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-brand">
+    <span className="inline-flex rounded-full border border-ink bg-canvas px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap text-ink">
       {PERFIL_LABEL[perfil] ?? fmt.dash}
     </span>
   );
@@ -37,8 +39,8 @@ export function ScoreBar({ score, faixa }) {
   const valor = Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0;
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="w-9 text-right font-semibold">{fmt.num(score)}</span>
-      <span className="h-1.5 w-16 overflow-hidden rounded-full bg-line" aria-hidden>
+      <span className="w-9 text-right font-bold">{fmt.num(score)}</span>
+      <span className="h-2 w-16 overflow-hidden rounded-full bg-line" aria-hidden>
         <span className={`block h-full rounded-full ${c.bg}`} style={{ width: `${valor}%` }} />
       </span>
     </span>
@@ -57,24 +59,25 @@ export function Sparkline({ valores = [], faixa, width = 72, height = 22 }) {
   const c = faixaClasses(faixa);
   return (
     <svg width={width} height={height} className={c.text} role="img" aria-label={`Uso: ${nums.join(", ")}`}>
-      <polyline points={pts.map((p) => p.join(",")).join(" ")} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+      <polyline points={pts.map((p) => p.join(",")).join(" ")} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
       <circle cx={lx} cy={ly} r="2.5" fill="currentColor" />
     </svg>
   );
 }
 
 // Botões: só um primário por tela.
+// Manual: ação primária em azul-noite, IA em índigo, secundária com borda de contraste.
 const BTN = {
-  primary: "bg-brand text-white hover:bg-brand/90",
-  secondary: "bg-surface text-ink border border-line hover:border-ink-faint",
-  ghost: "text-ink-soft hover:text-ink hover:bg-brand-soft",
-  ai: "bg-ai text-white hover:bg-ai/90",
+  primary: "border-ink bg-ink text-canvas hover:underline",
+  secondary: "border-ink bg-canvas text-ink hover:bg-surface hover:underline",
+  ghost: "border-transparent text-ink hover:underline",
+  ai: "border-ai bg-ai text-canvas hover:underline",
 };
 export function Button({ variant = "secondary", className = "", children, ...props }) {
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${BTN[variant]} ${className}`}
+      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-control border px-4 py-2 text-sm font-bold underline-offset-4 disabled:cursor-not-allowed disabled:border-dashed disabled:opacity-60 disabled:no-underline ${BTN[variant]} ${className}`}
       {...props}
     >
       {variant === "ai" && <span aria-hidden>✦</span>}
@@ -87,8 +90,8 @@ export function Button({ variant = "secondary", className = "", children, ...pro
 export function AiBlock({ fonte = "ia", children }) {
   const ia = fonte === "ia";
   return (
-    <section className={`rounded-lg border-l-4 p-4 ${ia ? "border-ai bg-ai-soft" : "border-ink-faint bg-canvas"}`}>
-      <p className={`mb-3 text-xs font-semibold ${ia ? "text-ai" : "text-ink-soft"}`}>
+    <section className={`rounded-panel p-4 ${ia ? "border-2 border-ai bg-ai-soft" : "border border-ink bg-canvas"}`}>
+      <p className={`mb-3 text-sm font-bold ${ia ? "text-ai" : "text-ink-soft"}`}>
         {ia ? "✦ gerado por IA" : "sugestão por regras"}
       </p>
       {children}
@@ -117,7 +120,7 @@ export function SkeletonRows({ rows = 5, cols = 5 }) {
 export function EmptyState({ title, hint, action }) {
   return (
     <div className="py-14 text-center">
-      <p className="text-base font-semibold">{title}</p>
+      <p className="text-lg font-bold">{title}</p>
       {hint && <p className="mt-1 text-sm text-ink-soft">{hint}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -159,12 +162,12 @@ export function BotoesRelatorio({ papel, filtros, rotuloPdf = "Baixar PDF", rotu
 
 export function Select({ label, value, onChange, options, allLabel = "Todos" }) {
   return (
-    <label className="flex flex-col gap-1 text-xs text-ink-soft">
+    <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
       {label}
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value || undefined)}
-        className="h-9 rounded-md border border-line bg-surface px-2.5 text-sm text-ink"
+        className="h-10 rounded-control border border-ink bg-surface px-2.5 text-sm font-normal text-ink"
       >
         <option value="">{allLabel}</option>
         {options.map((o) => {
@@ -178,9 +181,9 @@ export function Select({ label, value, onChange, options, allLabel = "Todos" }) 
 
 export function Chip({ children, onRemove }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-line bg-surface py-0.5 pl-3 pr-1 text-xs">
+    <span className="inline-flex items-center gap-1 rounded-full border border-ink bg-surface py-0.5 pl-3 pr-1 text-sm font-semibold">
       {children}
-      <button type="button" onClick={onRemove} className="rounded-full px-1.5 text-ink-faint hover:text-ink" aria-label={`Remover filtro ${children}`}>
+      <button type="button" onClick={onRemove} className="rounded-full px-1.5 text-ink-soft hover:text-ink" aria-label={`Remover filtro ${children}`}>
         ✕
       </button>
     </span>
@@ -207,7 +210,7 @@ export function PageHeader({ title, meta, children }) {
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
         {meta && <p className="mt-1 text-sm text-ink-soft">{meta}</p>}
       </div>
       {children}
@@ -215,16 +218,32 @@ export function PageHeader({ title, meta, children }) {
   );
 }
 
-export function Section({ title, aside, children, className = "" }) {
+export function Section({ title, aside, children, className = "", tone }) {
+  const borda = tone === "ai" ? "border-2 border-ai" : "border border-ink";
   return (
-    <section className={`rounded-lg bg-surface p-5 ${className}`}>
+    <section className={`rounded-panel bg-surface p-5 ${borda} ${className}`}>
       {(title || aside) && (
-        <div className="mb-3 flex items-baseline justify-between gap-4">
-          {title && <h2 className="text-base font-semibold">{title}</h2>}
+        <div className="mb-4 flex items-baseline justify-between gap-4">
+          {title && <h2 className="text-xl font-bold tracking-tight">{title}</h2>}
           {aside}
         </div>
       )}
       {children}
     </section>
+  );
+}
+
+// Símbolo do Radar (círculo com anéis e ponteiro). detail = cor dos anéis.
+export function RadarMark({ size = 32, className = "", detail = "var(--color-canvas)" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" className={className} aria-hidden>
+      <circle cx="20" cy="20" r="19" fill="currentColor" />
+      <g fill="none" stroke={detail} strokeWidth="1.7" strokeLinecap="round">
+        <circle cx="20" cy="20" r="12" />
+        <circle cx="20" cy="20" r="7" />
+        <path d="M20 20 29 11" />
+      </g>
+      <circle cx="20" cy="20" r="2" fill={detail} />
+    </svg>
   );
 }

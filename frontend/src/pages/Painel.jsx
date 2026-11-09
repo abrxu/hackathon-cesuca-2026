@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
-import PerguntaRadar from "../components/PerguntaRadar.jsx";
 import { ErrorState, PageHeader, ScoreBar, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
 
 export default function Painel() {
@@ -22,7 +21,6 @@ export default function Painel() {
             <Distribuicao dist={data?.distribuicao} perfis={data?.perfis} loading={loading} />
             <PorServico itens={data?.atendimentos_por_servico} loading={loading} />
           </div>
-          {usuario?.papel === "analista" && <div className="lg:col-span-2"><PerguntaRadar /></div>}
         </div>
       )}
     </>
@@ -43,16 +41,16 @@ function Kpis({ kpis, loading }) {
     { label: "Tempo médio de resolução", valor: fmt.minutos(kpis?.tempo_medio_resolucao_min), detalhe: "chamados resolvidos" },
   ];
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-line lg:col-span-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-ink bg-ink lg:col-span-2 lg:grid-cols-4">
       {itens.map((k, i) => (
         <div key={k.label} className="bg-surface px-5 py-4">
-          <p className="text-sm text-ink-soft">{k.label}</p>
+          <p className="text-sm font-semibold text-ink-soft">{k.label}</p>
           {loading ? (
             <Skeleton className="mt-2 h-10 w-20" />
           ) : (
-            <p className={`mt-1 font-display ${i === 0 ? "text-5xl text-risk-alto" : "text-4xl"}`}>{k.valor}</p>
+            <p className={`mt-2 font-display text-[40px] ${i === 0 ? "text-risk-alto" : ""}`}>{k.valor}</p>
           )}
-          <p className={`mt-2 text-xs ${k.ruim ? "font-semibold text-risk-alto" : "text-ink-faint"}`}>{loading ? " " : k.detalhe}</p>
+          <p className={`mt-2 text-sm ${k.ruim ? "font-bold text-risk-alto" : "text-ink-soft"}`}>{loading ? " " : k.detalhe}</p>
         </div>
       ))}
     </div>
@@ -62,17 +60,17 @@ function Kpis({ kpis, loading }) {
 function Prioridade({ itens, loading }) {
   const navigate = useNavigate();
   return (
-    <Section title="Prioridade de contato hoje" aside={<Link to="/clientes" className="text-sm font-medium text-brand hover:underline">Ver todos</Link>}>
+    <Section title="Prioridade de contato hoje" aside={<Link to="/clientes" className="text-sm font-semibold text-ink underline underline-offset-4 hover:no-underline">Ver todos</Link>}>
       {loading ? (
         <SkeletonRows rows={5} cols={4} />
       ) : (
         <table className="w-full text-sm">
-          <thead className="text-left text-xs text-ink-faint">
+          <thead className="border-b border-ink text-left text-sm text-ink-soft">
             <tr>
-              <th className="pb-2 font-medium">Cliente</th>
-              <th className="pb-2 font-medium">Porte</th>
-              <th className="pb-2 font-medium">Score</th>
-              <th className="pb-2 font-medium">Motivo principal</th>
+              <th className="pb-2 font-semibold">Cliente</th>
+              <th className="pb-2 font-semibold">Porte</th>
+              <th className="pb-2 font-semibold">Score</th>
+              <th className="pb-2 font-semibold">Motivo principal</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -80,7 +78,7 @@ function Prioridade({ itens, loading }) {
               <tr
                 key={c.cliente_id}
                 onClick={() => navigate(`/clientes/${c.cliente_id}`)}
-                className="cursor-pointer hover:bg-canvas"
+                className="cursor-pointer hover:bg-brand-soft"
               >
                 <td className="py-3 pr-4">
                   <Link to={`/clientes/${c.cliente_id}`} className="font-semibold hover:underline" onClick={(e) => e.stopPropagation()}>
@@ -108,32 +106,33 @@ function Distribuicao({ dist, perfis, loading }) {
         <Skeleton className="h-10 w-full" />
       ) : (
         <>
-          <div className="flex h-10 gap-0.5 overflow-hidden rounded-md">
+          <div className="flex h-10 gap-0.5 overflow-hidden rounded-control">
             {ordem.map((f) =>
               dist?.[f] ? (
                 <Link
                   key={f}
                   to={`/clientes?faixa=${f}`}
                   title={`${dist[f]} ${FAIXA_LABEL[f]} — abrir lista`}
-                  className={`${faixaClasses(f).bg} transition-opacity hover:opacity-85`}
+                  className={`${faixaClasses(f).bg} hover:opacity-85`}
                   style={{ width: `${(dist[f] / total) * 100}%` }}
                 />
               ) : null,
             )}
           </div>
-          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-base">
             {ordem.map((f) => (
               <li key={f}>
                 <Link to={`/clientes?faixa=${f}`} className="hover:underline">
-                  <span className={`font-semibold ${faixaClasses(f).text}`}>{fmt.num(dist?.[f])}</span> {FAIXA_LABEL[f].toLowerCase()}
+                  <span className={`mr-1.5 inline-block size-3 rounded-sm align-[-1px] ${faixaClasses(f).bg}`} aria-hidden />
+                  <span className="font-bold">{fmt.num(dist?.[f])}</span> {FAIXA_LABEL[f].toLowerCase()}
                 </Link>
               </li>
             ))}
           </ul>
-          <ul className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3 text-sm">
+          <ul className="mt-3 flex flex-wrap gap-2 border-t border-ink pt-3 text-sm">
             {Object.keys(PERFIL_LABEL).map((p) => (
               <li key={p}>
-                <Link to={`/clientes?perfil=${p}`} className="inline-flex gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand hover:underline">
+                <Link to={`/clientes?perfil=${p}`} className="inline-flex gap-1.5 rounded-full border border-ink bg-canvas px-2.5 py-0.5 text-sm font-semibold text-ink hover:underline">
                   {PERFIL_LABEL[p]} <span>{fmt.num(perfis?.[p])}</span>
                 </Link>
               </li>
@@ -154,13 +153,13 @@ function PorServico({ itens, loading }) {
       ) : (
         <ul className="space-y-3">
           {(itens ?? []).map((s) => (
-            <li key={s.servico} className="grid grid-cols-[120px_1fr_auto] items-center gap-3 text-sm">
+            <li key={s.servico} className="grid grid-cols-[130px_1fr_auto] items-center gap-3 text-sm">
               <span className="truncate">{s.servico}</span>
-              <span className="relative h-3 overflow-hidden rounded-sm bg-canvas" aria-hidden>
+              <span className="relative h-3 overflow-hidden rounded-sm bg-brand-soft" aria-hidden>
                 <span className="absolute inset-y-0 left-0 bg-brand/25" style={{ width: `${(s.total / max) * 100}%` }} />
                 <span className="absolute inset-y-0 left-0 bg-brand" style={{ width: `${(s.pendentes / max) * 100}%` }} />
               </span>
-              <span className="text-xs text-ink-soft whitespace-nowrap">
+              <span className="text-sm text-ink-soft whitespace-nowrap">
                 {fmt.num(s.total)} <span className="text-ink-faint">({fmt.num(s.pendentes)} pendentes)</span>
               </span>
             </li>

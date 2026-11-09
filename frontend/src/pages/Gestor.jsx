@@ -2,7 +2,6 @@ import { Navigate } from "react-router-dom";
 import { api } from "../api/client.js";
 import { fmt } from "../api/format.js";
 import { useAuth } from "../auth.jsx";
-import PerguntaRadar from "../components/PerguntaRadar.jsx";
 import { BotoesRelatorio, EmptyState, ErrorState, PageHeader, Section, SkeletonRows, useData } from "../components/ui.jsx";
 
 export default function Gestor() {
@@ -30,14 +29,14 @@ function GestorConteudo() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[800px] text-sm">
-                <thead className="text-left text-xs text-ink-faint">
+                <thead className="border-b border-ink text-left text-sm text-ink-soft">
                   <tr>
-                    <th className="pb-2 pr-4 font-medium">Serviço</th>
-                    <th className="pb-2 pr-4 font-medium">Assunto</th>
-                    <th className="pb-2 pr-4 text-right font-medium">Chamados</th>
-                    <th className="pb-2 pr-4 text-right font-medium">Satisfação média</th>
-                    <th className="pb-2 pr-4 text-right font-medium">Clientes afetados</th>
-                    <th className="pb-2 font-medium">Descrição</th>
+                    <th className="pb-2 pr-4 font-semibold">Serviço</th>
+                    <th className="pb-2 pr-4 font-semibold">Assunto</th>
+                    <th className="pb-2 pr-4 text-right font-semibold">Chamados</th>
+                    <th className="pb-2 pr-4 text-right font-semibold">Satisfação média</th>
+                    <th className="pb-2 pr-4 text-right font-semibold">Clientes afetados</th>
+                    <th className="pb-2 font-semibold">Descrição</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -56,7 +55,6 @@ function GestorConteudo() {
             </div>
           )}
         </Section>
-        <PerguntaRadar />
       </div>
     </>
   );
