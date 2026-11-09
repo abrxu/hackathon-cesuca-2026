@@ -10,12 +10,33 @@ Material de apoio para montar a apresentação de 5 minutos. Vocabulário em [GL
 4. O Gestor acompanha a carteira, vê onde o produto gera mais problemas e exporta relatórios em Excel e PDF para a diretoria.
 5. O score é feito por regras auditáveis, a IA só explica e escreve, e sem internet o sistema continua funcionando com sugestões por regras.
 
+## Critérios da banca (quadro do evento)
+
+| Critério | Pontos | O que a banca olha | Como o Radar responde |
+|---|---|---|---|
+| Criatividade | 25 | Abordagem original, pertinente e bem definida | Risco em facetas + perfis que mudam a ação; IA escreve o roteiro, regras decidem |
+| Utilidade | 25 | Benefício concreto e clareza do problema | "Com quem falar hoje e o que dizer" para o analista; relatório pronto para a diretoria |
+| Funcionamento | 25 | Demonstração real e confiabilidade básica | Dados oficiais, IA real, fallback sem internet, 18 testes |
+| Tecnologia | 15 | Uso coerente, explicabilidade e qualidade | Score = soma das facetas, agente com funções fixas, contrato documentado |
+| Apresentação | 10 | Objetividade, comunicação, respeito ao tempo | Roteiro de 5 min abaixo; ensaiar com cronômetro |
+
+## Eixos do desafio cobertos
+
+O enunciado pede soluções que **informam, automatizam, preveem, organizam, priorizam ou facilitam decisões**:
+
+- **Informar**: painel com KPIs, distribuição de risco e insights de produto.
+- **Organizar**: perfis de risco e carteira filtrável por porte, setor, cidade e serviço.
+- **Priorizar**: lista "com quem falar hoje" e fila de atendimentos reordenada por impacto.
+- **Facilitar decisões**: ação sugerida com roteiro e explicação do score por faceta.
+- **Automatizar**: roteiro de contato e relatórios Excel/PDF gerados sem trabalho manual.
+- **Prever**: sinal antecipado de risco (não previsão de cancelamento); modelo supervisionado é o próximo passo com histórico real.
+
 ## Roteiro (5 min)
 
 | Tempo | Conteúdo |
 |---|---|
 | 0:00–1:00 | **Problema e público.** Retenção é a receita de quem vende software por assinatura. Os sinais existem nos dados, mas ninguém junta. Público: Analista de CS (L1) e Gestor (L2). |
-| 1:00–4:00 | **Demo.** Login do analista → painel ("10 clientes em alto risco") → lista ordenada → cliente C022 (score 98: as facetas somam o score) → "Gerar ação sugerida" (roteiro de ligação pela IA) → "Marcar como contatado" (fica registrado quem e quando). Login do gestor → insights de produto → baixar relatório PDF para a diretoria. |
+| 1:00–4:00 | **Demo.** Login do analista → painel ("10 clientes em alto risco") → lista ordenada → cliente C022 (score 98: as facetas somam o score) → "Gerar ação sugerida" (roteiro de ligação pela IA) → "Marcar como contatado" (fica registrado quem e quando). Fila de atendimentos: o chamado do C022 sobe por causa do risco do cliente. **Só se a tela do gestor estiver pronta no front:** login do gestor → insights de produto → baixar PDF para a diretoria. |
 | 4:00–5:00 | **Resultados, limitações e próximo passo.** Números abaixo, limitações honestas e integração com o helpdesk real. |
 
 ## Frases que conectam com a Data Cempro
@@ -30,7 +51,7 @@ Material de apoio para montar a apresentação de 5 minutos. Vocabulário em [GL
 - 40 atendimentos pendentes, 13 de prioridade alta.
 - Distribuição de risco: 10 alto, 38 atenção, 52 saudáveis.
 - Perfis: 30 silenciosos, 19 frustrados, 10 travados, 41 saudáveis.
-- Ação sugerida pela IA: cerca de 4 s; fallback por regras: instantâneo.
+- Ação sugerida: os 5 clientes de maior prioridade já têm o roteiro da IA pronto ao subir o backend (resposta instantânea); os demais levam de 4 a 12 s; sem IA, o roteiro por regras é instantâneo.
 
 **Não citar** a acurácia do modelo de churn simulado (0,76): os rótulos são sintéticos e gerados com as mesmas facetas, então o número não mede nada real. Apresentar só como "pipeline pronto para receber histórico real".
 
@@ -83,3 +104,26 @@ Material de apoio para montar a apresentação de 5 minutos. Vocabulário em [GL
 3. Pesos configuráveis pelo gestor.
 4. Com histórico real de cancelamentos, treinar e validar um modelo supervisionado.
 5. Testes no pipeline de CI antes do deploy.
+
+## Autoavaliação (revisão independente, 20:45)
+
+Nota estimada: **76/100**. Sobe para cerca de 85 com a tela do gestor no frontend.
+
+| Eixo | Nota (0–5) | Situação |
+|---|---|---|
+| Priorizar | 5 | Lista de hoje e fila reordenada: **destacar no pitch** |
+| Facilitar decisões | 4 | Facetas que somam o score + ação sugerida |
+| Informar | 4 | Painel; insights de produto ainda sem tela |
+| Organizar | 4 | Filtros e perfis; perfis ainda não aparecem no painel |
+| Automatizar | 2 | Roteiro automático; relatórios existem na API mas sem botão no front |
+| Prever | 1 | Defender como sinal antecipado, nunca como previsão |
+
+| Critério | Estimativa | Principal risco |
+|---|---|---|
+| Funcionamento | 19/25 | Mostrar tela que não existe; front cair no modo de exemplo sem avisar |
+| Utilidade | 21/25 | Gestor sem tela própria |
+| Criatividade | 17/25 | Parecer "mais um dashboard": enfatizar perfis → ação diferente |
+| Tecnologia | 12/15 | Explicar k-means e fallback com clareza |
+| Apresentação | 7/10 | Roteiro prometer o que não está na tela |
+
+**Pendências do frontend** (time de front): tela do gestor com `/insights/produto` e download de `/relatorios/gestor.pdf|xlsx` via fetch com token; selo visível quando estiver usando `mock.js` e login sem fallback para mock; opcional, caixa "Pergunte ao Radar" chamando `/agente/perguntar`.

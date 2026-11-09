@@ -41,6 +41,9 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             log.warning("churn simulado indisponível: %s", e)
         app.state.store = Store(ds, riscos, db_url)
+        import threading
+        from app import ai as _ai
+        threading.Thread(target=_ai.aquecer_cache, args=(app.state.store,), daemon=True).start()
     except Exception as e:
         log.exception("falha ao carregar dados")
         app.state.load_error = str(e)

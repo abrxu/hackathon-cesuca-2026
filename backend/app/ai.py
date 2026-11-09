@@ -31,7 +31,7 @@ def _client():
     try:
         from openai import OpenAI
 
-        return OpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL") or "https://api.deepseek.com", api_key=key, timeout=5, max_retries=0)
+        return OpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL") or "https://api.deepseek.com", api_key=key, timeout=12, max_retries=0)
     except Exception as e:  # noqa: BLE001
         log.warning("cliente IA indisponível: %s", type(e).__name__)
         return None
@@ -101,7 +101,7 @@ def _acao_regras(d: dict, formato: str) -> dict:
     elif perfil == "travado":
         passo = "Destravar os atendimentos pendentes junto ao suporte antes de qualquer oferta."
         roteiro = [
-            f"Informar que estamos acompanhando os {len(pend)} atendimento(s) pendente(s).",
+            (f"Informar que estamos acompanhando o atendimento pendente." if len(pend) == 1 else f"Informar que estamos acompanhando os {len(pend)} atendimentos pendentes."),
             f"Alinhar o que falta para resolver {assunto} e quem responde por cada item.",
             "Combinar data para a próxima atualização.",
         ]
@@ -174,7 +174,29 @@ def _detalhe(store, cid: str) -> dict | None:
 _VAZIO = {"cliente": {}, "facetas": {}, "contexto": {}, "uso": [], "atendimentos": []}
 
 
+_CACHE_ACAO: dict = {}
+
+
+def aquecer_cache(store, limite: int = 5) -> None:
+    """Gera em segundo plano as ações por IA dos clientes de maior prioridade (demo sem espera)."""
+    try:
+        for item in store.listar()[:limite]:
+            sugerir_acao(store, item["cliente_id"], "ligacao")
+    except Exception as e:  # noqa: BLE001
+        log.warning("aquecimento do cache falhou: %s", type(e).__name__)
+
+
 def sugerir_acao(store, cliente_id: str, formato: str) -> dict:
+    chave = (cliente_id, formato)
+    if chave in _CACHE_ACAO:
+        return _CACHE_ACAO[chave]
+    r = _sugerir_acao(store, cliente_id, formato)
+    if r.get("fonte") == "ia":
+        _CACHE_ACAO[chave] = r
+    return r
+
+
+def _sugerir_acao(store, cliente_id: str, formato: str) -> dict:
     d = _detalhe(store, cliente_id) or _VAZIO
     try:
         cli = _client()
@@ -349,7 +371,7 @@ def _agente_regras(store, pergunta: str, papel: str) -> dict:
     if not itens:
         resp = "Não encontrei clientes com esses critérios."
     else:
-        resp = f"Encontrei {len(itens)} cliente(s)" + (f" com {', '.join(f'{k} {v}' for k, v in filtros.items())}" if filtros else "") + ". Prioridade: " + \
+        resp = f"Encontrei {len(itens)} " + ("cliente" if len(itens) == 1 else "clientes") + (f" com {', '.join(f'{k} {v}' for k, v in filtros.items())}" if filtros else "") + ". Prioridade: " + \
                "; ".join(f"{i.get('nome')} (score {i.get('score')})" for i in top[:5]) + "."
     return {"fonte": "regras", "resposta": resp, "ferramentas_usadas": usadas, "clientes": top}
 
