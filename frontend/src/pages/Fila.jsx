@@ -7,9 +7,10 @@ const SERVICOS = ["Sistema Alfa", "Sistema Beta", "Portal Web", "Aplicativo Mobi
 const ASSUNTOS = ["Acesso e senha", "Atualização", "Dúvida de utilização", "Erro no sistema", "Instalação", "Lentidão", "Relatório", "Solicitação de melhoria"];
 const CANAIS = ["E-mail", "Portal", "Telefone", "WhatsApp"];
 const SUGERIDA_CLASSES = {
-  "Crítica": "bg-risk-alto text-canvas",
-  Alta: "bg-risk-atencao text-ink",
-  Normal: "text-ink-soft",
+  "Crítica": "border-risk-alto bg-risk-alto text-white",
+  Alta: "border-risk-atencao bg-risk-atencao/15 text-ink",
+  Baixa: "border-ink/15 bg-ink/5 text-ink-soft",
+  Normal: "border-ink/15 bg-ink/5 text-ink-soft",
 };
 
 export default function Fila() {
@@ -82,7 +83,6 @@ export default function Fila() {
             <tbody className="divide-y divide-line">
               {data.itens.map((it) => {
                 const a = it.atendimento;
-                const diverge = it.prioridade_sugerida !== a.prioridade;
                 return (
                   <tr key={a.atendimento_id} className="hover:bg-brand-soft">
                     <td className="py-2.5 pl-5 pr-3 font-semibold">{it.posicao}</td>
@@ -95,7 +95,7 @@ export default function Fila() {
                     <td className="px-3 py-2.5 text-ink-soft">{a.servico}</td>
                     <td className="px-3 py-2.5 text-ink-soft">{a.prioridade}</td>
                     <td className="px-3 py-2.5">
-                      <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${diverge ? SUGERIDA_CLASSES[it.prioridade_sugerida] : "text-ink-soft"}`}>
+                      <span className={`inline-block rounded-full border px-2.5 py-0.5 text-sm font-bold ${SUGERIDA_CLASSES[it.prioridade_sugerida] ?? SUGERIDA_CLASSES.Normal}`}>
                         {it.prioridade_sugerida}
                       </span>
                     </td>
