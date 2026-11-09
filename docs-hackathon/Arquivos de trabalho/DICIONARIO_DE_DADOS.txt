@@ -1,0 +1,14 @@
+HACKATHON DATA CEMPRO 2026 — DICIONÁRIO DE DADOS
+
+Todos os registros são inteiramente fictícios e criados para fins educacionais.
+
+clientes.xlsx (100 registros)
+cliente_id: chave do cliente; nome_ficticio: identificação simulada; porte, setor, cidade: atributos; data_cadastro: AAAA-MM-DD.
+
+atendimentos.xlsx (300 registros)
+atendimento_id: chave do atendimento; cliente_id: referência a clientes.csv; data_abertura: data e hora ISO; servico: produto fictício; assunto: categoria; canal: origem; prioridade: prioridade informada; status: Resolvido ou Pendente; tempo_resolucao_min: minutos até resolução, vazio para pendentes; satisfacao_1_a_5: nota 1 a 5, vazia para pendentes.
+
+uso_servicos.xlsx (300 registros)
+cliente_id: referência a clientes.csv; mes: AAAA-MM; servico: produto fictício; acessos: contagem mensal; operacoes_realizadas: contagem mensal.
+
+Observações: Não inferir causalidade a partir de correlações. Dados são sintéticos e não representam a Data Cempro nem clientes reais. É permitido usar IA, mas a equipe deve explicar o que foi implementado e demonstrar seu funcionamento.
