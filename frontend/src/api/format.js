@@ -34,4 +34,3 @@ export const FAIXA_LABEL = { alto: "Alto risco", atencao: "Atenção", saudavel:
 export const PERFIL_LABEL = { silencioso: "Silencioso", frustrado: "Frustrado", travado: "Travado", saudavel: "Saudável" };
 export const FORMATO_LABEL = { ligacao: "Ligação", email: "E-mail", whatsapp: "WhatsApp" };
 
-export const faixaDoScore = (score) => (score >= 70 ? "alto" : score >= 40 ? "atencao" : "saudavel");

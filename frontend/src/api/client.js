@@ -1,4 +1,3 @@
-import * as mock from "./mock.js";
 import { ApiError } from "./errors.js";
 
 const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "/api";
@@ -10,44 +9,51 @@ const storage = {
 
 export { ApiError };
 
-/*
-  Chama o backend seguindo docs/api-contract.md.
-  Enquanto a rota não existe no backend (404/405/501) ou o backend está fora do ar,
-  responde com os dados de exemplo de mock.js no mesmo formato do contrato.
-*/
-async function request(method, path, body, fallback) {
+function sairDaSessao() {
+  storage.set("radar.token", null);
+  storage.set("radar.usuario", null);
+  if (window.location.pathname !== "/login") window.location.assign("/login");
+}
+
+// Chama o backend seguindo docs/api-contract.md. Qualquer falha vira ApiError.
+async function fetchAutenticado(method, path, body) {
+  const token = storage.get("radar.token");
   let res;
   try {
-    const token = storage.get("radar.token");
     res = await fetch(API_URL + path, {
       method,
       headers: {
-        "Content-Type": "application/json",
+        ...(body ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
-    return fallback();
+    throw new ApiError("rede", "Não foi possível conectar ao servidor.", 0);
   }
-  if ([404, 405, 501].includes(res.status) && !(await isContractError(res.clone()))) return fallback();
-  if (res.status === 401 && path !== "/auth/login") {
-    // Token ausente, expirado ou do login de exemplo: volta para a tela de entrada.
-    storage.set("radar.token", null);
-    storage.set("radar.usuario", null);
-    if (window.location.pathname !== "/login") window.location.assign("/login");
-  }
+  if (res.status === 401 && path !== "/auth/login") sairDaSessao();
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     throw new ApiError(data?.erro?.codigo ?? "erro_interno", data?.erro?.mensagem ?? "Não foi possível carregar os dados.", res.status);
   }
-  return res.json();
+  return res;
 }
 
-// 404 no formato do contrato ({erro:{codigo}}) é um "não encontrado" real, não rota ausente.
-async function isContractError(res) {
-  const data = await res.json().catch(() => null);
-  return Boolean(data?.erro?.codigo);
+const request = async (method, path, body) => (await fetchAutenticado(method, path, body)).json();
+
+async function baixar(path, nomePadrao) {
+  const res = await fetchAutenticado("GET", path);
+  const blob = await res.blob();
+  const cabecalho = res.headers.get("Content-Disposition") ?? "";
+  const nome = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cabecalho)?.[1] ?? nomePadrao;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = decodeURIComponent(nome);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const qs = (params = {}) => {
@@ -58,7 +64,7 @@ const qs = (params = {}) => {
 
 export const api = {
   async login(email, senha) {
-    const data = await request("POST", "/auth/login", { email, senha }, () => mock.login(email));
+    const data = await request("POST", "/auth/login", { email, senha });
     storage.set("radar.token", data.token);
     storage.set("radar.usuario", JSON.stringify(data.usuario));
     return data.usuario;
@@ -70,10 +76,13 @@ export const api = {
   usuarioSalvo() {
     try { return JSON.parse(storage.get("radar.usuario")); } catch { return null; }
   },
-  painel: () => request("GET", "/painel", null, mock.painel),
-  clientes: (filtros) => request("GET", "/clientes" + qs(filtros), null, () => mock.clientes(filtros)),
-  cliente: (id) => request("GET", `/clientes/${id}`, null, () => mock.cliente(id)),
-  acao: (id, formato) => request("POST", `/clientes/${id}/acao`, { formato }, () => mock.acao(id, formato)),
-  contato: (id, observacao) => request("POST", `/clientes/${id}/contato`, observacao ? { observacao } : {}, () => mock.contato(id)),
-  fila: (filtros) => request("GET", "/atendimentos/fila" + qs(filtros), null, () => mock.fila(filtros)),
+  painel: () => request("GET", "/painel"),
+  clientes: (filtros) => request("GET", "/clientes" + qs(filtros)),
+  cliente: (id) => request("GET", `/clientes/${id}`),
+  acao: (id, formato) => request("POST", `/clientes/${id}/acao`, { formato }),
+  contato: (id, observacao) => request("POST", `/clientes/${id}/contato`, observacao ? { observacao } : {}),
+  fila: (filtros) => request("GET", "/atendimentos/fila" + qs(filtros)),
+  insightsProduto: () => request("GET", "/insights/produto"),
+  perguntar: (pergunta) => request("POST", "/agente/perguntar", { pergunta }),
+  baixarRelatorio: (papel, formato, filtros) => baixar(`/relatorios/${papel}.${formato}${papel === "analista" ? qs(filtros) : ""}`, `relatorio-${papel}.${formato}`),
 };

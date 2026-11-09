@@ -5,6 +5,7 @@ const NAV = [
   { to: "/", label: "Painel", end: true },
   { to: "/clientes", label: "Clientes" },
   { to: "/chamados", label: "Chamados" },
+  { to: "/gestor", label: "Gestor", papel: "gestor" },
 ];
 
 export default function Layout() {
@@ -17,7 +18,7 @@ export default function Layout() {
             Radar
           </span>
           <nav className="flex gap-1" aria-label="Principal">
-            {NAV.map((n) => (
+            {NAV.filter((n) => !n.papel || n.papel === usuario?.papel).map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}

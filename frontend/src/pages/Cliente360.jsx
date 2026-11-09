@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client.js";
-import { PERFIL_LABEL, fmt } from "../api/format.js";
-import { Button, ErrorState, RiskPill, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
+import { fmt } from "../api/format.js";
+import { Button, ErrorState, PerfilPill, RiskPill, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
 import AcaoSugerida from "../components/AcaoSugerida.jsx";
 
 const FACETAS = [
@@ -42,14 +42,17 @@ export default function Cliente360() {
       {acaoAberta && data && (
         <AcaoSugerida
           cliente={data.cliente}
-          contatadoEm={data.contatado_em}
-          onContatado={(contatado_em) => setData({ ...data, contatado_em })}
+          contato={data}
+          onContatado={(r) => setData({ ...data, contatado_em: r.contatado_em, contatado_por: r.contatado_por })}
           onClose={() => setAcaoAberta(false)}
         />
       )}
     </>
   );
 }
+
+const contatadoPor = (d) =>
+  `Contatado${d.contatado_por ? ` por ${d.contatado_por}` : ""} em ${fmt.data(d.contatado_em)}`;
 
 function Voltar() {
   return (
@@ -82,15 +85,13 @@ function Cabecalho({ data, loading, onAcao }) {
           <Dado k="Cliente desde" v={fmt.mesAno(c.data_cadastro)} />
         </dl>
         <div className="mt-3 flex flex-wrap gap-2">
-          {data.perfil && (
-            <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand">Perfil {PERFIL_LABEL[data.perfil]}</span>
-          )}
+          {data.perfil && <PerfilPill perfil={data.perfil} />}
           {(data.contexto?.sinais ?? []).map((s) => (
             <span key={s} className="rounded-full border border-line px-2.5 py-0.5 text-xs text-ink-soft">{SINAL_LABEL(s)}</span>
           ))}
           {data.contatado_em && (
             <span className="rounded-full bg-risk-saudavel-soft px-2.5 py-0.5 text-xs font-semibold text-risk-saudavel">
-              Contatado em {fmt.data(data.contatado_em)}
+              {contatadoPor(data)}
             </span>
           )}
         </div>

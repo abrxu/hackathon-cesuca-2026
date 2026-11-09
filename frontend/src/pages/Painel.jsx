@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
-import { FAIXA_LABEL, fmt } from "../api/format.js";
+import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
+import PerguntaRadar from "../components/PerguntaRadar.jsx";
 import { ErrorState, PageHeader, ScoreBar, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
 
 export default function Painel() {
+  const { usuario } = useAuth();
   const { data, error, loading, reload } = useData(() => api.painel(), []);
 
   return (
@@ -16,9 +19,10 @@ export default function Painel() {
           <Kpis kpis={data?.kpis} loading={loading} />
           <Prioridade itens={data?.prioridade_hoje} loading={loading} />
           <div className="flex flex-col gap-6">
-            <Distribuicao dist={data?.distribuicao} loading={loading} />
+            <Distribuicao dist={data?.distribuicao} perfis={data?.perfis} loading={loading} />
             <PorServico itens={data?.atendimentos_por_servico} loading={loading} />
           </div>
+          {usuario?.papel === "analista" && <div className="lg:col-span-2"><PerguntaRadar /></div>}
         </div>
       )}
     </>
@@ -95,7 +99,7 @@ function Prioridade({ itens, loading }) {
   );
 }
 
-function Distribuicao({ dist, loading }) {
+function Distribuicao({ dist, perfis, loading }) {
   const ordem = ["alto", "atencao", "saudavel"];
   const total = ordem.reduce((a, f) => a + (dist?.[f] ?? 0), 0) || 1;
   return (
@@ -122,6 +126,15 @@ function Distribuicao({ dist, loading }) {
               <li key={f}>
                 <Link to={`/clientes?faixa=${f}`} className="hover:underline">
                   <span className={`font-semibold ${faixaClasses(f).text}`}>{fmt.num(dist?.[f])}</span> {FAIXA_LABEL[f].toLowerCase()}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3 text-sm">
+            {Object.keys(PERFIL_LABEL).map((p) => (
+              <li key={p}>
+                <Link to={`/clientes?perfil=${p}`} className="inline-flex gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand hover:underline">
+                  {PERFIL_LABEL[p]} <span>{fmt.num(perfis?.[p])}</span>
                 </Link>
               </li>
             ))}

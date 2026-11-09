@@ -6,7 +6,7 @@ import { AiBlock, Button, Skeleton } from "./ui.jsx";
 const FORMATOS = ["ligacao", "email", "whatsapp"];
 
 // Tela 04: painel lateral sobre o Cliente 360.
-export default function AcaoSugerida({ cliente, contatadoEm, onContatado, onClose }) {
+export default function AcaoSugerida({ cliente, contato, onContatado, onClose }) {
   const [formato, setFormato] = useState("ligacao");
   const [tentativa, setTentativa] = useState(0);
   const [estado, setEstado] = useState({ loading: true, data: null, error: null });
@@ -56,7 +56,7 @@ export default function AcaoSugerida({ cliente, contatadoEm, onContatado, onClos
     try {
       const r = await api.contato(cliente.cliente_id);
       setErroContato(null);
-      onContatado(r.contatado_em);
+      onContatado(r);
     } catch (err) {
       setErroContato(err.message || "Não foi possível marcar o contato. Tente de novo.");
     } finally {
@@ -135,8 +135,8 @@ export default function AcaoSugerida({ cliente, contatadoEm, onContatado, onClos
           <Button variant="primary" onClick={copiar} disabled={!d}>{copiado ? "Roteiro copiado" : "Copiar roteiro"}</Button>
           <Button onClick={() => setTentativa((t) => t + 1)} disabled={estado.loading}>Gerar de novo</Button>
           <span className="ml-auto">
-            {contatadoEm ? (
-              <span className="text-sm font-semibold text-risk-saudavel">Contatado em {fmt.data(contatadoEm)}</span>
+            {contato?.contatado_em ? (
+              <span className="text-sm font-semibold text-risk-saudavel">{`Contatado${contato.contatado_por ? ` por ${contato.contatado_por}` : ""} em ${fmt.data(contato.contatado_em)}`}</span>
             ) : (
               <Button variant="ghost" onClick={marcarContatado} disabled={marcando}>
                 {marcando ? "Marcando…" : "Marcar como contatado"}

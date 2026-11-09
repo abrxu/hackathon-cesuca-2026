@@ -1,6 +1,7 @@
 // Componentes visuais do protótipo. Quando o design system chegar em frontend/design,
 // adaptar aqui; as telas só usam estes componentes e os tokens de src/index.css.
 import { useEffect, useState } from "react";
+import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
 
 const FAIXA_CLASSES = {
@@ -21,9 +22,13 @@ export function RiskPill({ faixa }) {
   );
 }
 
-export function PerfilTag({ perfil }) {
+export function PerfilPill({ perfil }) {
   if (!perfil) return <span className="text-ink-faint">{fmt.dash}</span>;
-  return <span className="text-xs text-ink-soft whitespace-nowrap">{PERFIL_LABEL[perfil]}</span>;
+  return (
+    <span className="inline-flex rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-brand">
+      {PERFIL_LABEL[perfil] ?? fmt.dash}
+    </span>
+  );
 }
 
 // Barra de score: preenchimento colorido pela faixa, número ao lado.
@@ -123,9 +128,32 @@ export function ErrorState({ error, onRetry }) {
   return (
     <EmptyState
       title={error?.message || "Não foi possível carregar os dados."}
-      hint="Verifique se o backend está rodando e tente de novo."
       action={onRetry && <Button onClick={onRetry}>Tentar de novo</Button>}
     />
+  );
+}
+
+// Baixa um relatório pela API (com token) e mostra erro discreto se falhar.
+export function BotoesRelatorio({ papel, filtros, rotuloPdf = "Baixar PDF", rotuloExcel = "Baixar Excel" }) {
+  const [baixando, setBaixando] = useState(null);
+  const [erro, setErro] = useState(null);
+  async function baixar(formato) {
+    setBaixando(formato);
+    setErro(null);
+    try {
+      await api.baixarRelatorio(papel, formato, filtros);
+    } catch (e) {
+      setErro(e.message || "Não foi possível baixar o relatório.");
+    } finally {
+      setBaixando(null);
+    }
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button onClick={() => baixar("pdf")} disabled={baixando !== null}>{baixando === "pdf" ? "Gerando…" : rotuloPdf}</Button>
+      <Button onClick={() => baixar("xlsx")} disabled={baixando !== null}>{baixando === "xlsx" ? "Gerando…" : rotuloExcel}</Button>
+      {erro && <span className="text-sm text-risk-alto" role="alert">{erro}</span>}
+    </div>
   );
 }
 

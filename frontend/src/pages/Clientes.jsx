@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
 import {
-  Button, Chip, EmptyState, ErrorState, PageHeader, PerfilTag, RiskPill, ScoreBar, Select, SkeletonRows, Sparkline, useData,
+  BotoesRelatorio, Button, Chip, EmptyState, ErrorState, PageHeader, PerfilPill, RiskPill, ScoreBar, Select, SkeletonRows, Sparkline, useData,
 } from "../components/ui.jsx";
 
 const OPCOES = {
@@ -20,6 +21,7 @@ const CAMPOS = Object.keys(ROTULOS);
 const valorLegivel = (campo, v) => (campo === "faixa" ? FAIXA_LABEL[v] : campo === "perfil" ? PERFIL_LABEL[v] : v);
 
 export default function Clientes() {
+  const { usuario } = useAuth();
   const [params, setParams] = useSearchParams();
   const filtros = Object.fromEntries([...params.entries()].filter(([, v]) => v));
   const chave = params.toString();
@@ -62,7 +64,9 @@ export default function Clientes() {
 
   return (
     <>
-      <PageHeader title="Clientes" meta={data ? `${data.total} clientes ordenados por prioridade de contato` : " "} />
+      <PageHeader title="Clientes" meta={data ? `${data.total} clientes ordenados por prioridade de contato` : " "}>
+        {usuario?.papel === "analista" && <BotoesRelatorio papel="analista" filtros={filtros} rotuloPdf="Baixar PDF" />}
+      </PageHeader>
 
       <div className="mb-3 flex flex-wrap items-end gap-3">
         <label className="flex min-w-64 flex-1 flex-col gap-1 text-xs text-ink-soft">
@@ -130,7 +134,7 @@ export default function Clientes() {
                   <td className="px-3 py-2.5 text-ink-soft">{c.cidade}</td>
                   <td className="px-3 py-2.5"><ScoreBar score={c.score} faixa={c.faixa} /></td>
                   <td className="px-3 py-2.5"><RiskPill faixa={c.faixa} /></td>
-                  <td className="px-3 py-2.5"><PerfilTag perfil={c.perfil} /></td>
+                  <td className="px-3 py-2.5"><PerfilPill perfil={c.perfil} /></td>
                   <td className="px-3 py-2.5"><Sparkline valores={(c.uso_total ?? []).map((u) => u.acessos)} faixa={c.faixa} /></td>
                   <td className="px-3 py-2.5 text-right">{fmt.num(c.pendentes)}</td>
                   <td className="px-3 py-2.5 text-right">{fmt.nota(c.satisfacao_media)}</td>

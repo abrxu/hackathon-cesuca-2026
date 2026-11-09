@@ -6,6 +6,7 @@ import Painel from "./pages/Painel.jsx";
 import Clientes from "./pages/Clientes.jsx";
 import Cliente360 from "./pages/Cliente360.jsx";
 import Fila from "./pages/Fila.jsx";
+import Gestor from "./pages/Gestor.jsx";
 
 function Protegido({ children }) {
   const { usuario } = useAuth();
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="clientes" element={<Clientes />} />
             <Route path="clientes/:id" element={<Cliente360 />} />
             <Route path="chamados" element={<Fila />} />
+            <Route path="gestor" element={<Gestor />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
