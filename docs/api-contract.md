@@ -51,8 +51,9 @@ Códigos: `nao_autenticado` (401), `nao_autorizado` (403), `nao_encontrado` (404
 
 ### `GET /health`
 ```json
-{ "status": "ok", "db": "PostgreSQL 16.x" }
+{ "status": "ok", "db": "PostgreSQL 16.x", "dados_carregados": true, "erro_carga": null }
 ```
+`status` vira `"degradado"` se o banco cair ou a carga dos xlsx falhar (`db: null` / `dados_carregados: false`); a rota nunca retorna 500.
 
 ### `POST /auth/login`
 Request:
@@ -113,7 +114,8 @@ Response:
   "uso_total": [ { "mes": "2026-07", "acessos": 410, "operacoes": 1220 }, { "mes": "2026-08", "acessos": 300, "operacoes": 800 }, { "mes": "2026-09", "acessos": 160, "operacoes": 460 } ],
   "pendentes": 2,
   "satisfacao_media": 2.0,
-  "contatado_em": null
+  "contatado_em": null,
+  "contatado_por": null
 }
 ```
 
@@ -175,7 +177,7 @@ Nunca retorna erro por falha da IA: cai para `fonte: "regras"` com o mesmo forma
 
 ### `POST /clientes/{cliente_id}/contato`
 Request: `{ "observacao": "Ligação feita, agendada revisão" }` (opcional)
-Response: `{ "cliente_id": "C037", "contatado_em": "2026-11-09T20:40:00" }`
+Response: `{ "cliente_id": "C037", "contatado_em": "2026-11-09T20:40:00", "contatado_por": "Ana Analista" }` (o usuário do token fica registrado para auditoria). `contatado_por` também aparece em `ClienteResumo` e no detalhe do cliente.
 
 ### `GET /atendimentos/fila`
 Query: `ordem` (`inteligente` padrão | `chegada`), `servico`, `assunto`, `canal`.
@@ -247,4 +249,4 @@ No fallback por regras vem `meta` com `"fonte": "regras"`, um único `delta` e o
 { "disponivel": true, "amostras": 2000, "acuracia": 0.81, "coeficientes": { "engajamento": 1.9, "atrito": 1.2, "satisfacao": 0.8 } }
 ```
 
-O agente só chama funções fixas do backend (`listar_clientes`, `detalhe_cliente`, `resumo_carteira`, `insights_produto`); nunca gera SQL.
+A IA responde em texto simples (sem markdown) e cita clientes pelo código. Para a IA vão só código e métricas do cliente, nunca o nome. O agente só chama funções fixas do backend (`listar_clientes`, `detalhe_cliente`, `resumo_carteira`, `insights_produto`); nunca gera SQL.

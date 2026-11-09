@@ -25,6 +25,7 @@ A cada mudança que altere como rodar, configurar ou usar a aplicação (novas d
 - O contrato entre as frentes é [docs/api-contract.md](docs/api-contract.md). Qualquer mudança de rota, campo ou enum atualiza esse arquivo no mesmo commit.
 - Não editar `frontend/` sem pedido explícito.
 - Módulos internos do backend e suas interfaces: [docs/backend-internals.md](docs/backend-internals.md).
+- Material do pitch (descrição em 5 frases, roteiro, justificativas, perguntas da banca): [docs/pitch.md](docs/pitch.md). Atualizar quando números ou escolhas mudarem.
 - `AGENTS.md` é symlink para este arquivo (Codex/ChatGPT); editar só o `CLAUDE.md`.
 
 ## Git e segredos

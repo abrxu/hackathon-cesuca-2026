@@ -14,7 +14,9 @@ FORMATOS = {"ligacao": "ligação telefônica", "email": "e-mail", "whatsapp": "
 SYSTEM_BASE = (
     "Você é o assistente de Sucesso do Cliente de uma empresa de software B2B. Escreva em português do Brasil, "
     "de forma direta e profissional. Você NÃO calcula score nem prevê churn: apenas explica, escreve e organiza "
-    "com base nos dados recebidos. Use somente fatos presentes nos dados. Não inclua ressalvas sobre possíveis erros."
+    "com base nos dados recebidos. Use somente fatos presentes nos dados. Não inclua ressalvas sobre possíveis erros. "
+    "Responda em texto simples, sem markdown: sem tabelas, sem asteriscos, sem títulos com #; use listas com hífen. "
+    "Refira-se aos clientes pelo código (ex.: C022)."
 )
 
 
@@ -29,7 +31,7 @@ def _client():
     try:
         from openai import OpenAI
 
-        return OpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL") or "https://api.deepseek.com", api_key=key, timeout=8)
+        return OpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL") or "https://api.deepseek.com", api_key=key, timeout=5, max_retries=0)
     except Exception as e:  # noqa: BLE001
         log.warning("cliente IA indisponível: %s", type(e).__name__)
         return None
@@ -44,7 +46,7 @@ def _sse(evento: str, dados: dict) -> str:
 def _contexto_cliente(d: dict) -> dict:
     cli = d.get("cliente", {})
     return {
-        "cliente": {k: cli.get(k) for k in ("nome", "porte", "setor", "cidade", "meses_de_casa")},
+        "cliente": {k: cli.get(k) for k in ("cliente_id", "porte", "setor", "cidade", "meses_de_casa")},
         "score": d.get("score"),
         "faixa": d.get("faixa"),
         "perfil": d.get("perfil"),
@@ -284,7 +286,7 @@ def _executar_tool(store, nome: str, args: dict, papel: str, coletados: list):
         itens = itens[:lim]
         coletados.extend(itens)
         return {"total": len(itens), "itens": [
-            {k: i.get(k) for k in ("cliente_id", "nome", "porte", "setor", "cidade", "score", "faixa", "perfil", "motivo_principal", "pendentes")}
+            {k: i.get(k) for k in ("cliente_id", "porte", "setor", "cidade", "score", "faixa", "perfil", "motivo_principal", "pendentes")}
             for i in itens]}
     if nome == "detalhe_cliente":
         return _contexto_cliente(store.cliente_detalhe(str(args.get("cliente_id", ""))))
@@ -364,7 +366,7 @@ def perguntar(store, pergunta: str, papel: str) -> dict:
             ]
             usadas: list[str] = []
             coletados: list = []
-            for _ in range(4):
+            for _ in range(2):
                 r = cli.chat.completions.create(model=_model(), messages=msgs, tools=tools, temperature=0.2)
                 msg = r.choices[0].message
                 if not msg.tool_calls:
@@ -433,7 +435,7 @@ def resumo_executivo(store) -> str:
         if cli is not None:
             p = store.painel()
             dados = {"kpis": p.get("kpis"), "distribuicao": p.get("distribuicao"), "perfis": p.get("perfis"),
-                     "top_risco": [{k: i.get(k) for k in ("nome", "score", "perfil", "motivo_principal")} for i in store.listar(faixa="alto")[:5]],
+                     "top_risco": [{k: i.get(k) for k in ("cliente_id", "score", "perfil", "motivo_principal")} for i in store.listar(faixa="alto")[:5]],
                      "insights_produto": _insights(store)[:3]}
             r = cli.chat.completions.create(model=_model(), temperature=0.3, messages=[
                 {"role": "system", "content": SYSTEM_BASE},
