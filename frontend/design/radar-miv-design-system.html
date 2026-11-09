@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar de Clientes | MIV e Design System</title>
+<style>
+/* Radar de Clientes · tokens de interface v1.0 */
+:root {
+  /* Amostras rotuladas de "prioridade alta", lidas no PDF. */
+  --radar-ink: #0F172A;
+  --radar-canvas: #F8FAFC;
+  --radar-hover: #FDFEFF;
+  --radar-risk-high: #DC2626;
+  --radar-risk-attention: #D97706;
+  --radar-risk-healthy: #059669;
+  --radar-ai: #4F46E5;
+
+  --radar-text: var(--radar-ink);
+  --radar-surface: var(--radar-canvas);
+  --radar-surface-raised: var(--radar-hover);
+  --radar-action: var(--radar-ink);
+  --radar-on-action: var(--radar-canvas);
+  --radar-on-ai: var(--radar-canvas);
+  --radar-on-high: var(--radar-canvas);
+  --radar-on-attention: var(--radar-ink);
+  --radar-on-healthy: var(--radar-ink);
+  --radar-control-border: var(--radar-ink);
+  --radar-focus: var(--radar-ink);
+  --radar-focus-gap: var(--radar-hover);
+
+  --radar-font: "Segoe UI", system-ui, sans-serif;
+  --radar-caption: 0.8125rem;
+  --radar-label: 0.875rem;
+  --radar-body: 1rem;
+  --radar-h3: 1.125rem;
+  --radar-h2: 1.375rem;
+  --radar-h1: clamp(1.75rem, 3vw, 2.5rem);
+  --radar-kpi: clamp(1.75rem, 4vw, 2.5rem);
+  --radar-leading-body: 1.5;
+  --radar-leading-title: 1.2;
+  --radar-space-1: 0.25rem;
+  --radar-space-2: 0.5rem;
+  --radar-space-3: 0.75rem;
+  --radar-space-4: 1rem;
+  --radar-space-5: 1.5rem;
+  --radar-space-6: 2rem;
+  --radar-radius-control: 0.5rem;
+  --radar-radius-panel: 0.75rem;
+  --radar-radius-badge: 99rem;
+  --radar-target: 2.75rem;
+  --radar-motion: 120ms;
+  --radar-width-max: 90rem;
+}
+
+/* Faixas propostas para a grade. Em media queries, use valores literais.
+   Celular < 48rem | tablet 48rem–63.99rem | desktop ≥ 64rem. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --radar-motion: 0ms; }
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+body { margin: 0; background: var(--radar-canvas); color: var(--radar-text); font: var(--radar-body)/1.5 var(--radar-font); }
+h1,h2,h3,p,figure,dl { margin: 0; }
+h1,h2,h3 { line-height: var(--radar-leading-title); overflow-wrap: anywhere; }
+h1 { font-size: clamp(2.15rem, 7vw, 5.4rem); letter-spacing: -.06em; max-width: 15ch; }
+h2 { font-size: clamp(1.65rem, 3.5vw, 2.55rem); letter-spacing: -.04em; }
+h3 { font-size: var(--radar-h3); }
+p + p { margin-top: .75rem; }
+a { color: inherit; text-decoration-thickness: .09em; text-underline-offset: .22em; }
+button, select { font: inherit; }
+:focus-visible { outline: 3px solid var(--radar-focus); outline-offset: 3px; box-shadow: 0 0 0 3px var(--radar-focus-gap); }
+[hidden] { display: none !important; }
+.skip { position: absolute; top: .75rem; left: .75rem; z-index: 2; padding: .75rem; background: var(--radar-hover); }
+.skip:not(:focus) { clip-path: inset(50%); }
+.shell { width: min(100% - 2rem, 72rem); margin-inline: auto; }
+.mast { background: var(--radar-ink); color: var(--radar-canvas); padding-block: 1.2rem clamp(2rem, 7vw, 5.25rem); }
+.mast-top, .brand, .wrap-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.mast-top { justify-content: space-between; gap: 1rem; }
+.brand { font-weight: 750; gap: .6rem; }
+.mark { inline-size: 2rem; block-size: 2rem; flex: none; }
+.mast .mark { color: var(--radar-canvas); }
+.mast h1 { margin: 2.5rem 0 1rem; }
+.lead { max-width: 58ch; font-size: clamp(1rem,2vw,1.25rem); }
+.rule { display: flex; gap: .25rem; margin-top: 2rem; }
+.rule i { width: 2rem; height: .38rem; border-radius: .1rem; }
+.toc { border-bottom: 1px solid var(--radar-ink); }
+.toc ul { margin-block: 0; padding: .5rem 0; display: flex; flex-wrap: wrap; gap: 0 1.1rem; list-style: none; }
+.toc a { display: inline-flex; align-items: center; min-height: var(--radar-target); font-weight: 650; }
+main { padding-bottom: 3rem; }
+.chapter { padding-block: clamp(2rem,5vw,4rem); border-bottom: 1px solid var(--radar-ink); }
+.chapter-head { display: grid; gap: .55rem; margin-bottom: 1.4rem; }
+.chapter-head p { max-width: 74ch; }
+.index { font-size: var(--radar-caption); letter-spacing: .14em; font-weight: 800; text-transform: uppercase; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%, 16rem),1fr)); gap: .8rem; }
+.grid > *, .show-grid > *, .dash-grid > *, .demo-metrics > * { min-width: 0; }
+.panel { background: var(--radar-hover); border: 1px solid var(--radar-ink); border-radius: var(--radar-radius-panel); padding: 1rem; }
+.panel h3 + p, .panel h3 + ul, .panel h3 + dl, .panel h3 + .wrap-row { margin-top: .65rem; }
+.stack { display: grid; gap: .85rem; }
+.spaced { margin-top: 1.1rem; }
+.small { font-size: var(--radar-label); }
+.mono, .number, time { font-variant-numeric: tabular-nums; }
+code { overflow-wrap: anywhere; font-size: .9em; }
+.sources { padding-left: 1.25rem; }
+.sources li + li { margin-top: .55rem; }
+.wordmark { display: flex; align-items: center; gap: .7rem; font-size: 1.25rem; font-weight: 800; }
+.wordmark .mark { width: 2.5rem; height: 2.5rem; color: var(--radar-ai); }
+.wordmark.inverse { padding: .75rem; background: var(--radar-ink); color: var(--radar-canvas); border-radius: var(--radar-radius-control); }
+.wordmark.inverse .mark { color: var(--radar-canvas); }
+.swatch { overflow: hidden; padding: 0; }
+.swatch .sample { display: grid; align-content: end; min-height: 5.15rem; padding: .7rem .9rem; background: var(--sample); color: var(--on, var(--radar-ink)); font-weight: 800; }
+.swatch figcaption { padding: .75rem .9rem; font-size: var(--radar-label); }
+.ink-bg { --sample: var(--radar-ink); --on: var(--radar-canvas); }
+.high-bg { --sample: var(--radar-risk-high); --on: var(--radar-on-high); }
+.attention-bg { --sample: var(--radar-risk-attention); }
+.healthy-bg { --sample: var(--radar-risk-healthy); }
+.ai-bg { --sample: var(--radar-ai); --on: var(--radar-on-ai); }
+.canvas-bg { --sample: var(--radar-canvas); }
+.hover-bg { --sample: var(--radar-hover); }
+.table-zone { overflow-x: auto; border: 1px solid var(--radar-ink); border-radius: var(--radar-radius-panel); }
+table { width: 100%; border-collapse: collapse; background: var(--radar-hover); text-align: left; }
+caption { text-align: left; padding: .8rem; font-weight: 750; }
+th,td { padding: .55rem .7rem; vertical-align: top; border-top: 1px solid var(--radar-ink); }
+thead th { background: var(--radar-canvas); }
+.contrast th:nth-child(3), .contrast td:nth-child(3) { white-space: nowrap; }
+.definitions dt { font-weight: 750; }
+.definitions dd { margin: 0 0 .7rem; }
+.definitions dd:last-child { margin-bottom: 0; }
+.button, select { min-height: var(--radar-target); display: inline-flex; align-items: center; justify-content: center; padding: .48rem .72rem; border-radius: var(--radar-radius-control); border: 1px solid var(--radar-control-border); background: var(--radar-canvas); color: var(--radar-ink); font-weight: 700; }
+.button { text-decoration: none; cursor: pointer; }
+.button.secondary:hover { background: var(--radar-hover); text-decoration: underline; }
+.button.primary { background: var(--radar-action); color: var(--radar-on-action); }
+.button.ai { background: var(--radar-ai); color: var(--radar-on-ai); border-color: var(--radar-ai); }
+.button.primary:hover, .button.ai:hover { text-decoration: underline; }
+.button:disabled { border-style: dashed; cursor: default; }
+.badge { display: inline-flex; align-items: center; gap: .3rem; max-width: 100%; padding: .22rem .55rem; border-radius: var(--radar-radius-badge); background: var(--sample, var(--radar-canvas)); color: var(--on, var(--radar-ink)); font-size: var(--radar-label); font-weight: 750; }
+.badge.neutral { border: 1px solid var(--radar-ink); }
+.ai-panel { border: 2px solid var(--radar-ai); }
+.risk-text { color: var(--radar-risk-high); }
+.ai-text { color: var(--radar-ai); }
+.specimen { display: grid; gap: .9rem; padding: clamp(.75rem,3vw,1.4rem); background: var(--radar-canvas); border: 1px solid var(--radar-ink); border-radius: var(--radar-radius-panel); }
+.spec-head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: .65rem; }
+.spec-head h3 { font-size: var(--radar-h1); }
+.control-group { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .55rem; }
+.control-group label { display: grid; gap: .2rem; font-size: var(--radar-label); }
+.demo-metrics { display: grid; grid-template-columns: 1fr; gap: .7rem; }
+.metric strong { display: block; font-size: var(--radar-kpi); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.metric span { font-size: var(--radar-label); }
+.dash-grid { display: grid; grid-template-columns: 1fr; gap: .7rem; align-items: start; }
+.rank { list-style: none; padding: 0; margin: .5rem 0 0; }
+.rank li + li { border-top: 1px solid var(--radar-ink); }
+.rank a { display: flex; min-height: var(--radar-target); align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .25rem .65rem; padding: .45rem .25rem; }
+.risk-bar { display: flex; gap: .18rem; min-height: .85rem; margin: .85rem 0 .45rem; }
+.risk-bar span { flex: var(--part); background: var(--sample); border-radius: .2rem; }
+.legend { display: flex; flex-wrap: wrap; gap: .35rem .65rem; list-style: none; margin: 0; padding: 0; }
+.legend li { font-size: var(--radar-caption); }
+.module-options { min-inline-size: 0; border: 1px solid var(--radar-ink); border-radius: var(--radar-radius-control); margin: 0; padding: .25rem .65rem; }
+.module-options label { display: inline-flex; min-height: var(--radar-target); align-items: center; gap: .3rem; margin-inline-end: .7rem; }
+input { accent-color: var(--radar-ink); }
+.screen-demo { display: grid; gap: .5rem; }
+.screen-demo strong { font-weight: 750; }
+.screen-demo .track { display: grid; grid-template-columns: repeat(var(--cols), minmax(0,1fr)); gap: .25rem; }
+.screen-demo .track span { min-height: 1.55rem; background: var(--radar-canvas); border: 1px solid var(--radar-ink); border-radius: .22rem; }
+.screen-demo .track .wide { grid-column: 1 / -1; background: var(--radar-ink); }
+.show-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%, 17rem),1fr)); gap: .8rem; }
+.facet-list { margin: .5rem 0 0; padding: 0; list-style: none; }
+.facet-list li { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; padding: .4rem 0; border-bottom: 1px solid var(--radar-ink); }
+.foot { padding-block: 1.2rem; background: var(--radar-ink); color: var(--radar-canvas); }
+@media (min-width: 24rem) { .demo-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (min-width: 48rem) { .shell { width: min(100% - 3rem,72rem); } .dash-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } }
+@media (min-width: 64rem) { .demo-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto; animation-duration: 0ms; transition-duration: 0ms; } }
+@media print {
+  .shell { width: 100%; }
+  .toc, .skip, .interactive { display: none !important; }
+  .mast, .foot { print-color-adjust: exact; }
+  .swatch, .badge, .risk-bar, .track { print-color-adjust: exact; }
+  .panel, figure, tr { break-inside: avoid; }
+  h2,h3 { break-after: avoid; }
+  .chapter { padding-block: 1.2rem; }
+  .mast { padding: 1rem; }
+  .mast h1 { margin-top: 1rem; font-size: 2.5rem; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#conteudo">Ir ao conteúdo</a>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <symbol id="radar-mark" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="19" fill="currentColor"/>
+    <g fill="none" stroke="var(--mark-detail,var(--radar-canvas))" stroke-width="1.7" stroke-linecap="round">
+      <circle cx="20" cy="20" r="12"/><circle cx="20" cy="20" r="7"/><path d="M20 20 29 11"/>
+    </g>
+    <circle cx="20" cy="20" r="2" fill="var(--mark-detail,var(--radar-canvas))"/>
+  </symbol>
+</svg>
+<header class="mast">
+  <div class="shell">
+    <div class="mast-top">
+      <div class="brand"><svg class="mark" aria-hidden="true" style="--mark-detail:var(--radar-ink)"><use href="#radar-mark"/></svg>Radar de Clientes</div>
+      <span class="index">Hackathon Data Cempro · Cesuca 2026</span>
+    </div>
+    <h1>Manual de identidade visual e design system</h1>
+    <p class="lead">Guia do frontend para o time de Customer Success. Da visão da carteira à próxima ação com o cliente.</p>
+    <div class="rule" aria-hidden="true">
+      <i style="background:var(--radar-risk-high)"></i><i style="background:var(--radar-risk-attention)"></i><i style="background:var(--radar-risk-healthy)"></i><i style="background:var(--radar-ai)"></i>
+    </div>
+  </div>
+</header>
+<nav class="toc" aria-label="Sumário"><ul class="shell">
+  <li><a href="#identidade">Identidade</a></li><li><a href="#paleta">Paleta</a></li><li><a href="#fundamentos">Fundamentos</a></li>
+  <li><a href="#componentes">Componentes</a></li><li><a href="#telas">Telas</a></li><li><a href="#atualizacao">Atualização</a></li><li><a href="#validacao">Validação</a></li>
+</ul></nav>
+<main class="shell" id="conteudo">
+  <section class="chapter" id="identidade" aria-labelledby="titulo-identidade">
+    <header class="chapter-head"><span class="index">01 · MIV</span><h2 id="titulo-identidade">Identidade do Radar</h2><p>O analista decide quem contatar e como agir. O gestor acompanha a carteira e prepara a visão consolidada para a diretoria. A interface apresenta o sinal de risco, as evidências e a próxima ação nessa ordem.</p></header>
+    <div class="grid">
+      <div class="panel stack">
+        <h3>Assinatura visual</h3>
+        <div class="wordmark"><svg class="mark" aria-hidden="true"><use href="#radar-mark"/></svg>Radar de Clientes</div>
+        <div class="wordmark inverse"><svg class="mark" aria-hidden="true" style="--mark-detail:var(--radar-ink)"><use href="#radar-mark"/></svg>Radar de Clientes</div>
+        <p class="small">Releitura vetorial proposta a partir do símbolo visto na prancha. Use a assinatura horizontal em login e cabeçalho, com o símbolo isolado para favicon. A versão inversa serve para fundo de contraste.</p>
+      </div>
+      <div class="panel">
+        <h3>Área de proteção</h3>
+        <p>Reserve metade do diâmetro do símbolo em torno da assinatura. Use símbolo de 32 px no cabeçalho, mínimo de 24 px na assinatura e 16 px isolado no favicon.</p>
+        <p>Preserve proporção, alinhamento e legibilidade. Evite rotacionar, esticar, aplicar degradê ou usar vermelho, âmbar e verde na marca. Em uma imagem sem texto adjacente, use o nome acessível “Radar de Clientes”.</p>
+      </div>
+      <div class="panel">
+        <h3>Voz e hierarquia</h3>
+        <p>Escreva em português direto. Prefira “Ver cliente”, “Copiar roteiro” e “Registrar contato”. Use “Score de risco”, “Perfil de risco” e “Atendimento” conforme o glossário.</p>
+        <p>Títulos em azul-noite. Destaque vermelho apenas em títulos de risco alto e índigo em títulos de IA. Em títulos de atenção e saudável, use azul-noite com pílula semântica junto ao título.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="paleta" aria-labelledby="titulo-paleta">
+    <header class="chapter-head"><span class="index">02 · MIV</span><h2 id="titulo-paleta">Paleta oficial e contraste</h2><p>Sete HEX distintos nas oito amostras rotuladas de “prioridade alta”. Fundo e box de contraste repetem o mesmo HEX. As imagens da prancha ilustram o layout. As amostras rotuladas definem as cores usadas aqui.</p></header>
+    <div class="grid">
+      <figure class="panel swatch ink-bg"><div class="sample">Contraste · #0F172A</div><figcaption>Texto, títulos gerais, bordas funcionais, foco e ação primária.</figcaption></figure>
+      <figure class="panel swatch canvas-bg"><div class="sample">Fundo e box · #F8FAFC</div><figcaption>Canvas, superfícies base e texto sobre fundos escuros.</figcaption></figure>
+      <figure class="panel swatch hover-bg"><div class="sample">Hover em box · #FDFEFF</div><figcaption>Superfície clara e hover, com sublinhado ou outra indicação adicional de interação.</figcaption></figure>
+      <figure class="panel swatch high-bg"><div class="sample">Prioridade alta · #DC2626</div><figcaption>Alto risco, destaque crítico e erro de validação acompanhado de mensagem.</figcaption></figure>
+      <figure class="panel swatch attention-bg"><div class="sample">Risco · #D97706</div><figcaption>Faixa Atenção e dados desatualizados, sempre com rótulo.</figcaption></figure>
+      <figure class="panel swatch healthy-bg"><div class="sample">Saudável · #059669</div><figcaption>Faixa Saudável. Confirmações usam texto específico, como “Roteiro copiado”.</figcaption></figure>
+      <figure class="panel swatch ai-bg"><div class="sample">IA · #4F46E5</div><figcaption>Copiloto, ação de geração e contorno da resposta assistida.</figcaption></figure>
+    </div>
+    <div class="table-zone spaced">
+      <table class="contrast">
+        <caption>Pares para texto normal · cálculo WCAG em sRGB</caption>
+        <thead><tr><th scope="col">Texto</th><th scope="col">Fundo</th><th scope="col">Razão</th></tr></thead>
+        <tbody>
+          <tr><td>Azul-noite</td><td>Fundo / hover</td><td>17,06 / 17,68:1</td></tr>
+          <tr><td>Índigo / vermelho</td><td>Fundo</td><td>6,01 / 4,62:1</td></tr>
+          <tr><td>Fundo claro</td><td>Índigo / vermelho</td><td>6,01 / 4,62:1</td></tr>
+          <tr><td>Azul-noite</td><td>Âmbar / verde</td><td>5,60 / 4,74:1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="spaced">A meta WCAG 2.2 AA é 4,5:1 para texto normal e 3:1 para texto grande e elementos gráficos ou controles essenciais. Âmbar e verde sobre o fundo têm 3,04:1 e 3,60:1. Use-os como marca gráfica e mantenha os rótulos em azul-noite. Fundo e hover têm apenas 1,04:1. Delimite controles com borda de contraste e use foco visível com contorno de 3 px separado por halo claro de 3 px.</p>
+  </section>
+
+  <section class="chapter" id="fundamentos" aria-labelledby="titulo-fundamentos">
+    <header class="chapter-head"><span class="index">03 · Design system</span><h2 id="titulo-fundamentos">Tipografia, grid e leitura</h2><p>Escala proposta para uma interface densa no desktop e legível no celular e no auditório. A prancha define as cores. Os demais valores abaixo compõem o sistema proposto.</p></header>
+    <div class="grid">
+      <div class="panel">
+        <h3>Escala tipográfica</h3>
+        <dl class="definitions"><dt>Título de página</dt><dd>28–40 px, peso 750, entrelinha 1,2.</dd><dt>Seção / componente</dt><dd>22 / 18 px, peso 700. Um H1 por página.</dd><dt>Corpo / rótulo / metadado</dt><dd>16 / 14 / 13 px. Corpo com entrelinha 1,5. Em projeção, mantenha valores e rótulos da demo em 16 px ou mais.</dd><dt>Indicador</dt><dd>28–40 px com números tabulares. Família Segoe UI, system-ui, sans-serif. Fontes locais para a demo.</dd></dl>
+      </div>
+      <div class="panel">
+        <h3>Espaço, forma e movimento</h3>
+        <dl class="definitions"><dt>Escala de espaço</dt><dd>4, 8, 12, 16, 24 e 32 px em rem. Use 8 px entre texto e ícone, 16 px no cartão e 24 px entre módulos.</dd><dt>Raio</dt><dd>8 px nos controles, 12 px nos módulos e pílula totalmente arredondada.</dd><dt>Interação</dt><dd>Alvo padrão de 44 × 44 px em controles de toque. Transições curtas de até 120 ms. Respeite a preferência por movimento reduzido.</dd></dl>
+      </div>
+      <div class="panel">
+        <h3>Ícones e gráficos</h3>
+        <dl class="definitions"><dt>Ícones</dt><dd>Traço simples de 20 px, com texto nas ações principais. Botões só de ícone têm nome acessível, como “Fechar ação sugerida”.</dd><dt>Gráficos</dt><dd>Unidade, período, rótulos diretos e alternativa em tabela ou lista. Combine cor, texto e padrões ou marcadores. Tooltip também disponível por foco ou toque.</dd><dt>Números</dt><dd>Formate em pt-BR. Use “88 de 100”, “3,6 de 5” e “4h12”. Na célula ausente, mostre “—” com equivalente “Sem dado” para leitura assistiva.</dd></dl>
+      </div>
+    </div>
+    <div class="grid spaced">
+      <figure class="panel screen-demo"><strong>Celular · 320–767 px</strong><div class="track" style="--cols:1" aria-hidden="true"><span class="wide"></span><span></span><span></span><span></span></div><figcaption>Grade-base de 4 colunas, margem de 16 px. Módulos empilhados. KPIs em duas colunas quando os rótulos couberem. Filtros em painel, clientes em cartões e Copiloto em tela inteira.</figcaption></figure>
+      <figure class="panel screen-demo"><strong>Tablet · 768–1023 px</strong><div class="track" style="--cols:2" aria-hidden="true"><span class="wide"></span><span></span><span></span><span></span><span></span></div><figcaption>Grade-base de 8 colunas, margem de 24 px. KPIs em 2 × 2. Divida os módulos em duas áreas quando houver espaço. Filtros podem quebrar linha. Copiloto lateral só com espaço para leitura.</figcaption></figure>
+      <figure class="panel screen-demo"><strong>Desktop · 1024 px ou mais</strong><div class="track" style="--cols:4" aria-hidden="true"><span class="wide"></span><span></span><span></span><span></span><span></span><span class="wide"></span></div><figcaption>Grade-base de 12 colunas, margem de 32 px. Quatro KPIs em linha e composição 7/5 abaixo. Limite de 1440 px. Para a banca, confira 1440 × 900 em projeção.</figcaption></figure>
+    </div>
+    <p class="spaced">Mantenha a mesma ordem de leitura no DOM e na tela. Em largura de 320 px, preserve as ações principais sem rolagem horizontal da página. Se uma tabela exigir duas dimensões, use rolagem local identificada ou cartões com os mesmos dados.</p>
+  </section>
+
+  <section class="chapter" id="componentes" aria-labelledby="titulo-componentes">
+    <header class="chapter-head"><span class="index">04 · Design system</span><h2 id="titulo-componentes">Componentes e estados</h2></header>
+    <div class="show-grid">
+      <div class="panel"><h3>Ações</h3><div class="wrap-row"><a class="button primary" href="#telas">Ver cliente</a><a class="button secondary" href="#atualizacao">Ver atualização</a><a class="button ai" href="#amostra-ia">✦ Ação sugerida</a></div><p class="spaced small">Uma ação de maior ênfase por contexto. Primário para avançar, secundário para alternativas e índigo para IA. Navegação usa link. Comandos usam botão. No carregamento, preserve o rótulo contextual e impeça pedidos duplicados.</p></div>
+      <div class="panel"><h3>Faixa, perfil e prioridade</h3><div class="wrap-row"><span class="badge high-bg">▲ Alto risco</span><span class="badge attention-bg">◆ Atenção</span><span class="badge healthy-bg">● Saudável</span></div><p class="spaced small">Faixas do score: alto ≥ 70, atenção de 40 a 69, saudável &lt; 40. O perfil aparece como texto separado. Na fila, “Prioridade informada” e “Prioridade sugerida” são campos distintos.</p></div>
+      <div class="panel"><h3>Filtro e navegação</h3><p>Nome acessível persistente, busca por nome ou código e contagem de resultados. Chips removíveis anunciam o filtro que retiram. Estado ativo com rótulo e sublinhado ou contorno. Use <code>aria-current="page"</code> na navegação e <code>aria-sort</code> no cabeçalho ordenado.</p></div>
+      <div class="panel"><h3>Cartão de indicador</h3><p>Nome, valor, unidade e recorte. Exiba variação apenas quando a comparação existir no contrato. Use rótulos como “4 a mais vs. agosto”. Cartão interativo inclui destino explícito e mantém um único alvo de navegação.</p></div>
+      <div class="panel"><h3>Carregando, vazio e erro</h3><p>Esqueleto com o formato final e mensagem curta. Vazio filtrado oferece “Limpar filtros”. Falha inicial oferece “Tentar novamente”. Falha na atualização mantém o último resultado com estado “Dados desatualizados” e horário.</p></div>
+      <div class="panel"><h3>Teclado e feedback</h3><p>Links, botões e campos nativos. Use foco visível e mantenha-o durante atualizações. Confirmações breves em <code>role="status"</code>. Diálogos movem foco para dentro, aceitam Esc e o devolvem ao botão de origem. Cabeçalhos fixos deixam o foco visível.</p></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="telas" aria-labelledby="titulo-telas">
+    <header class="chapter-head"><span class="index">05 · Padrões de tela</span><h2 id="titulo-telas">Do painel à ação de retenção</h2><p>Amostra do Painel geral com valores ilustrativos do contrato. Teste os módulos e a atualização. A amostra mantém a mesma base ao sincronizar.</p></header>
+    <section class="specimen" aria-label="Amostra interativa do Painel geral">
+      <div class="spec-head">
+        <div><h3>Painel geral</h3><p class="small">Dados até set/2026 · amostra do manual</p></div>
+        <div class="control-group interactive">
+          <label for="cadencia">Atualização<select id="cadencia"><option value="0">Manual</option><option value="30">A cada 30 s</option><option value="60">A cada 60 s</option><option value="120">A cada 120 s</option></select></label>
+          <button type="button" class="button secondary" id="sincronizar">Atualizar agora</button>
+        </div>
+      </div>
+      <p class="small interactive"><span id="sincronizacao">Aguardando primeira atualização da amostra.</span><span id="feedback" role="status"></span></p>
+      <div class="demo-metrics" aria-label="Indicadores da carteira">
+        <div class="panel metric"><span>Clientes em alto risco</span><strong class="risk-text">14</strong><span>4 a mais vs. período anterior</span></div>
+        <div class="panel metric"><span>Atendimentos pendentes</span><strong>40</strong><span>9 de prioridade alta</span></div>
+        <div class="panel metric"><span>Satisfação média</span><strong>3,6</strong><span>de 5</span></div>
+        <div class="panel metric"><span>Tempo médio de resolução</span><strong>4h12</strong><span>atendimentos resolvidos</span></div>
+      </div>
+      <fieldset class="module-options interactive">
+        <legend>Módulos visíveis</legend>
+        <label><input type="checkbox" data-module="prioridades" checked> Prioridade de contato</label>
+        <label><input type="checkbox" data-module="distribuicao" checked> Distribuição de risco</label>
+      </fieldset>
+      <div class="dash-grid">
+        <article class="panel" id="prioridades"><h3>Prioridade de contato hoje</h3><ul class="rank"><li><a href="#amostra-360"><span>Empresa Exemplo 037 · C037</span><span class="badge high-bg">▲ 88 · Alto risco</span></a></li></ul><p class="small">Operações caíram 62% desde julho.</p></article>
+        <figure class="panel" id="distribuicao"><h3>Distribuição de risco</h3><div class="risk-bar" aria-hidden="true"><span class="healthy-bg" style="--part:60"></span><span class="attention-bg" style="--part:26"></span><span class="high-bg" style="--part:14"></span></div><ul class="legend"><li>● 60 saudáveis</li><li>◆ 26 em atenção</li><li>▲ 14 em alto risco</li></ul></figure>
+        <p id="modulos-vazios" hidden>Ative um módulo para exibir seus dados.</p>
+      </div>
+    </section>
+    <div class="show-grid spaced">
+      <article class="panel"><h3>Entrada</h3><p>Assinatura, e-mail e senha com rótulos, mostrar/ocultar senha e “Acessar painel”. Campos aceitam colar e preenchimento automático. O contrato prevê login. Cadastro e atalho de demo na prancha dependem de fluxos disponíveis antes de entrar na navegação.</p></article>
+      <article class="panel"><h3>Painel geral</h3><p>Quatro KPIs, top 5 de prioridade, distribuição por faixa e atendimentos por serviço. Selecione uma faixa por link textual e abra Clientes com filtro aplicado. Prioridade abre Cliente 360. Em tela pequena, a prioridade vem antes dos gráficos.</p></article>
+      <article class="panel"><h3>Clientes</h3><p>Busca e filtros de faixa, perfil, porte, setor, cidade e serviço. Ordenação inicial por prioridade do contrato, com desempate pelo porte. Preserve filtros ao voltar do detalhe. No celular, cada cartão traz nome, score, faixa, motivo e link para o detalhe.</p></article>
+      <article class="panel" id="amostra-360"><h3>Cliente 360</h3><p>Nome, cadastro, faixa e score. Apresente as três facetas com contribuição em pontos. O contexto fica em seção própria. O gráfico mostra uso total mensal do cliente, com acessos e operações, e o histórico fica do mais recente ao mais antigo.</p><ul class="facet-list"><li>Engajamento <strong>36 pts</strong></li><li>Atrito <strong>28 pts</strong></li><li>Satisfação <strong>24 pts</strong></li><li><strong>Score de risco</strong><span class="badge high-bg">▲ 88 de 100</span></li></ul></article>
+      <article class="panel ai-panel" id="amostra-ia"><h3 class="ai-text">✦ Ação sugerida</h3><p>Copiloto lateral no desktop e tela inteira no celular. Abas Ligação, E-mail e WhatsApp. Mostre resumo, próximo passo, roteiro e evidências usadas. “Copiar roteiro” é a ação principal e “Registrar contato” confirma somente após sucesso da API.</p><p class="small">Exemplo de próximo passo: ligar hoje e tratar o atendimento de lentidão primeiro. Base: 5 atendimentos e 3 meses de uso.</p></article>
+      <article class="panel"><h3>Fila inteligente</h3><p>Compare Ordem inteligente e Ordem de chegada. Mostre posição, cliente, assunto, prioridade informada, prioridade sugerida, tempo em aberto e motivo. O seletor e os filtros vêm antes da lista. Priorize a rota na demo quando estiver estável.</p></article>
+      <article class="panel"><h3>Visão do gestor</h3><p>Reutilize os módulos do Painel. Acrescente Insights de produto com serviço, assunto, volume e clientes afetados. Disponibilize o Relatório do gestor em PDF e XLSX conforme o contrato. A diretoria recebe os arquivos. O analista tem seu relatório próprio.</p></article>
+      <article class="panel"><h3>Copiloto de carteira</h3><p>O agente do contrato responde perguntas com texto e links para clientes, quando disponíveis. Use o mesmo contêiner de IA. Durante streaming, preserve foco e leitura, anuncie a resposta concluída uma vez e mantenha a versão sem streaming como caminho de implementação simples.</p></article>
+    </div>
+    <p class="spaced"><strong>Ordem da demo:</strong> Painel → Clientes → Cliente 360 → Ação sugerida. A Fila é a extensão. No pitch, mostre o caminho da evidência à ação. Explique as limitações na fala e no README. Quando o serviço de IA cair, renderize a resposta por regras no mesmo layout e use uma origem factual, como “Sugestão por regras”.</p>
+  </section>
+
+  <section class="chapter" id="atualizacao" aria-labelledby="titulo-atualizacao">
+    <header class="chapter-head"><span class="index">06 · Comportamento</span><h2 id="titulo-atualizacao">Modularidade e atualização de dados</h2><p>A base do desafio tem um recorte histórico. O horário da última consulta indica sincronização da interface. O mês de referência informa a cobertura dos dados.</p></header>
+    <div class="grid">
+      <article class="panel"><h3>Cadência proposta</h3><p>Manual como padrão. “Atualizar agora” está disponível em qualquer modo. Opções de 30, 60 e 120 s para painel e fila. “Manual” desliga a atualização automática. Suspenda consultas em abas ocultas e reinicie o intervalo ao voltar.</p></article>
+      <article class="panel"><h3>Estado preservado</h3><p>Uma requisição por recurso e recorte por vez. Ignore respostas antigas quando o filtro mudar. Ao sincronizar, preserve foco, filtros, posição e módulos visíveis. Se falhar, mantenha os últimos dados válidos e ofereça nova tentativa.</p></article>
+      <article class="panel"><h3>Módulos independentes</h3><p>Cada módulo tem título, corpo, estado e ação próprios. KPIs e prioridade formam o núcleo do painel na demo. A amostra permite ocultar os dois módulos abaixo dos KPIs. Na implementação, guarde preferências locais por papel e ofereça reposição do layout padrão.</p></article>
+      <article class="panel"><h3>Leitura sem interrupções</h3><p>Não recarregue a página. Anuncie atualização manual e falhas relevantes em um status breve. Mantenha atualizações automáticas silenciosas para o leitor de tela. Pause a aplicação de mudanças que reordenam uma lista enquanto alguém estiver interagindo com ela.</p></article>
+    </div>
+  </section>
+
+  <section class="chapter" id="validacao" aria-labelledby="titulo-validacao">
+    <header class="chapter-head"><span class="index">07 · Entrega ao frontend</span><h2 id="titulo-validacao">Implementação e critérios de aceite</h2><p>Na revisão consultada, o React/Vite está ligado à rota de saúde e o CSS importa Tailwind. Este manual define a camada visual a implementar sobre essa base e o contrato existente.</p></header>
+    <div class="grid">
+      <article class="panel"><h3>Estrutura proposta</h3><p>Importe <code>radar-tokens.css</code> em <code>frontend/src/index.css</code>, após a importação do Tailwind. Organize a interface em <code>AppShell</code>, <code>PageHeader</code>, <code>MetricCard</code>, <code>RiskBadge</code>, <code>FilterBar</code>, <code>DataState</code> e <code>ActionPanel</code>. Centralize tokens e formatação em vez de repetir HEX nos componentes.</p></article>
+      <article class="panel"><h3>Regras que vêm da API</h3><p>Consuma as faixas, facetas e ordenação entregues pelo contrato. Porte só desempata a prioridade. A IA explica e escreve, e o score vem do backend. Preserve o contexto separado das facetas. Campos <code>null</code> aparecem como ausentes. Exiba insights de produto para gestor.</p></article>
+      <article class="panel"><h3>Checklist da equipe</h3><ul class="sources"><li>320, 390, 768, 1024 e 1440 px, orientação retrato e paisagem, zoom de 200% e reflow a 400%.</li><li>Tab e Shift+Tab, Enter, Espaço, Esc, foco após modal e leitura com NVDA ou VoiceOver.</li><li>Contraste de foco, bordas, texto e gráficos. Risco legível em escala de cinza e sem hover.</li><li>Carregamento, filtros vazios, dados ausentes, erro, refresh manual e fallback de IA.</li><li>Executar o fluxo da demo com cada papel e conferir as permissões de relatórios e insights.</li></ul></article>
+    </div>
+  </section>
+
+  <section class="chapter" id="referencias" aria-labelledby="titulo-referencias">
+    <header class="chapter-head"><span class="index">08 · Referências</span><h2 id="titulo-referencias">Fontes e decisões</h2></header>
+    <ul class="sources">
+      <li>Paleta e referências visuais de login, painel e Copiloto. HEX amostrados no centro dos círculos do PDF “prioridade alta”. <a href="https://www.canva.com/design/DAHadnNS-So/JegcAVch51wgepD9CbM0-g/edit">Prancha no Canva</a></li>
+      <li>Hierarquia, sequência da demo e padrões de tela. “telas-wireframes.pdf”, páginas 1 a 7.</li>
+      <li>Mapa do Desafio, regulamento, enunciado e dicionário de dados. <a href="https://github.com/abrxu/hackathon-cesuca-2026/tree/f1dd98d49d78af0102ea67bfa27e5756d657287b/docs-hackathon">Documentos do hackathon</a></li>
+      <li>Estado do front, regras de domínio e contrato usados para resolver divergências com os exemplos dos wireframes. <a href="https://github.com/abrxu/hackathon-cesuca-2026/tree/f1dd98d49d78af0102ea67bfa27e5756d657287b/frontend">Frontend</a> · <a href="https://github.com/abrxu/hackathon-cesuca-2026/blob/f1dd98d49d78af0102ea67bfa27e5756d657287b/CLAUDE.md">CLAUDE.md</a> · <a href="https://github.com/abrxu/hackathon-cesuca-2026/blob/f1dd98d49d78af0102ea67bfa27e5756d657287b/docs/api-contract.md">Contrato da API</a></li>
+      <li>Referência para contraste, teclado, reflow, alvo de toque e controle de conteúdo atualizado. <a href="https://www.w3.org/TR/WCAG22/">WCAG 2.2</a></li>
+    </ul>
+  </section>
+</main>
+<footer class="foot"><div class="shell wrap-row"><strong>Radar de Clientes</strong><span>Manual de identidade visual e design system · v1.0 · 9 nov. 2026</span></div></footer>
+<script>
+  const cadence = document.getElementById('cadencia');
+  const syncButton = document.getElementById('sincronizar');
+  const sync = document.getElementById('sincronizacao');
+  const feedback = document.getElementById('feedback');
+  const choices = Array.from(document.querySelectorAll('[data-module]'));
+  const empty = document.getElementById('modulos-vazios');
+  const moduleGrid = empty.parentElement;
+  const format = new Intl.DateTimeFormat('pt-BR', { timeStyle: 'medium' });
+  let timer;
+  let syncs = 0;
+
+  function showSync(manual = false) {
+    const time = document.createElement('time');
+    const now = new Date();
+    time.dateTime = now.toISOString();
+    time.textContent = format.format(now);
+    sync.replaceChildren('Amostra atualizada às ', time, '.');
+    if (manual) feedback.textContent = ' Atualização manual concluída (' + ++syncs + ').';
+  }
+
+  function schedule() {
+    clearInterval(timer);
+    const seconds = Number(cadence.value);
+    if (seconds && !document.hidden) {
+      timer = setInterval(() => showSync(), seconds * 1000);
+    }
+  }
+
+  function showModules() {
+    let visible = 0;
+    for (const choice of choices) {
+      document.getElementById(choice.dataset.module).hidden = !choice.checked;
+      visible += Number(choice.checked);
+    }
+    empty.hidden = visible > 0;
+    moduleGrid.style.gridTemplateColumns = visible < 2 ? 'minmax(0, 1fr)' : '';
+  }
+
+  syncButton.addEventListener('click', () => {
+    showSync(true);
+    schedule();
+  });
+  cadence.addEventListener('change', schedule);
+  document.addEventListener('visibilitychange', schedule);
+  for (const choice of choices) choice.addEventListener('change', showModules);
+  showModules();
+  schedule();
+</script>
+</body>
+</html>
