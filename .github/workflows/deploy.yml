@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy na VPS
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > deploy.env <<ENV
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_BASE_URL=https://api.deepseek.com
+          DEEPSEEK_MODEL=deepseek-flash
+          ENV
+          sed -i 's/^ *//' deploy.env
+          ssh -i ~/.ssh/deploy "$SSH_USER@$SSH_HOST" "$GITHUB_SHA" < deploy.env
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS https://hackathon.abrxu.com/api/health && exit 0
+            sleep 5
+          done
+          exit 1
