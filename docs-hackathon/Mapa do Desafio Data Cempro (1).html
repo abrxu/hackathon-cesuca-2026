@@ -1,0 +1,427 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mapa do Desafio Data Cempro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: coluna editorial única, seções como "estações" de um pipeline de dados ligadas por um trilho vertical */
+:root{
+  --bg:#EDF0F2; --surface:#FFFFFF; --ink:#132029; --muted:#5A6873; --line:#C9D1D7;
+  --accent:#0F7B6C; --accent-soft:#D3ECE7; --signal:#D98A00; --signal-soft:#FBEBCB; --alert:#C2413A;
+  --c-cli:#3A6EA5; --c-ate:#B4542E; --c-uso:#0F7B6C;
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E161C; --surface:#16222A; --ink:#E4EBEF; --muted:#93A3AE; --line:#2B3B46;
+  --accent:#3FC1AA; --accent-soft:#163A35; --signal:#F2B23C; --signal-soft:#3A2D12; --alert:#EF7A72;
+  --c-cli:#7AA8DA; --c-ate:#E88A62; --c-uso:#3FC1AA; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E161C; --surface:#16222A; --ink:#E4EBEF; --muted:#93A3AE; --line:#2B3B46;
+  --accent:#3FC1AA; --accent-soft:#163A35; --signal:#F2B23C; --signal-soft:#3A2D12; --alert:#EF7A72;
+  --c-cli:#7AA8DA; --c-ate:#E88A62; --c-uso:#3FC1AA; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto;padding-block:40px 80px;display:flex;flex-direction:column;gap:72px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.08}
+h1{font-size:clamp(2.4rem,6vw,4.4rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3.4vw,2.3rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0;max-width:65ch}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lead{font-size:1.15rem;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:22px}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+.mono{font-family:var(--f-mono)}
+
+/* HERO */
+.hero{display:flex;flex-direction:column;gap:20px}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:500}
+
+/* PIPELINE SVG */
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;overflow-x:auto}
+.diagram svg{display:block;width:100%;min-width:640px;height:auto}
+.diagram text{font-family:var(--f-body);fill:var(--ink)}
+.diagram .small{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+.flow{fill:none;stroke-width:2.2;stroke-dasharray:6 8;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-28}}
+.pulse{animation:pulse 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.dot{animation:travel 3s linear infinite}
+
+/* DATA CARDS */
+.files{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.file{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;border-top:4px solid var(--c)}
+.file .n{font-family:var(--f-display);font-size:2.4rem;font-weight:800;color:var(--c);line-height:1}
+.file ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.file li{font-family:var(--f-mono);font-size:.72rem;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--muted)}
+.file li.key{background:var(--signal-soft);color:var(--ink)}
+.note{font-size:.9rem;color:var(--muted);border-left:3px solid var(--signal);padding-left:12px}
+
+/* SCORING BARS */
+.score{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:start}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:4px 10px;align-items:center}
+.bar .lbl{font-size:.92rem;grid-column:1/-1;display:flex;justify-content:space-between}
+.bar .track{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;grid-column:1}
+.bar .fill{height:100%;width:var(--w);background:var(--accent);border-radius:6px;animation:grow 1.4s cubic-bezier(.2,.8,.2,1) both}
+.bar.hot .fill{background:var(--signal)}
+.bar .pts{font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums;text-align:right}
+@keyframes grow{from{width:8%}}
+.deliver{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.deliver ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.deliver .tag{display:inline-block;font-family:var(--f-mono);font-size:.72rem;padding:3px 8px;border-radius:5px;background:var(--accent-soft);color:var(--ink)}
+
+/* IDEAS */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 .85rem var(--f-body);padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.idea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.idea{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;animation:rise .45s ease both;animation-delay:calc(var(--i)*35ms)}
+@keyframes rise{from{transform:translateY(8px)}}
+.idea.top{border-color:var(--signal);box-shadow:0 0 0 1px var(--signal)}
+.ihead{display:flex;align-items:center;gap:10px}
+.num{font-family:var(--f-display);font-weight:800;font-size:1.5rem;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.addon{align-self:flex-start;font-family:var(--f-mono);font-size:.7rem;padding:3px 8px;border-radius:5px;background:var(--signal-soft);color:var(--ink)}
+.rule .rn{font-family:var(--f-mono);font-size:.75rem;opacity:.6}
+.layers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.layer{border:1px dashed var(--signal);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.layer ul{margin:0;padding-left:18px;font-size:.9rem;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+@media (max-width:760px){.layers{grid-template-columns:1fr}}
+.idea .cat{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.idea p{font-size:.9rem;color:var(--muted)}
+.idea .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.srcs{display:flex;gap:4px}
+.src{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;font-family:var(--f-mono);font-size:.7rem;font-weight:500;color:#fff;background:var(--c)}
+.src.off{background:transparent;color:var(--line);border:1px dashed var(--line)}
+.effort{display:flex;gap:3px;align-items:center;font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.effort i{width:8px;height:14px;border-radius:2px;background:var(--line)}
+.effort i.on{background:var(--accent)}
+.effort.risk i.on{background:var(--alert)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* TIMELINE */
+.timeline{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;overflow-x:auto}
+.tl{position:relative;min-width:680px;display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:0;row-gap:10px}
+.tl .hour{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);border-left:1px solid var(--line);padding-left:4px}
+.seg{border-radius:8px;padding:10px 12px;font-size:.85rem;display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.seg b{font-family:var(--f-display);font-size:.95rem}
+.seg small{font-family:var(--f-mono);font-size:.7rem;opacity:.8}
+.seg.c1{background:var(--accent);color:var(--surface)}
+.seg.c2{background:color-mix(in srgb,var(--accent) 65%,var(--surface));color:var(--ink)}
+.seg.c3{background:var(--signal);color:#1d1400}
+.seg.freeze{background:var(--alert);color:#fff}
+.seg.neutral{background:var(--bg);color:var(--ink);border:1px dashed var(--line)}
+.seg.shine::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-100%);animation:shine 3.5s ease-in-out infinite}
+@keyframes shine{60%,100%{transform:translateX(100%)}}
+
+/* COMBOS */
+.combos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.combo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.chain span{font-size:.85rem;padding:6px 10px;border-radius:7px;background:var(--accent-soft)}
+.chain .arr{background:none;padding:0;color:var(--accent);font-family:var(--f-mono);animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateX(3px)}}
+.combo .why{font-size:.9rem;color:var(--muted)}
+
+/* RULES */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.rule{padding:16px;border-radius:12px;background:var(--ink);color:var(--bg);display:flex;flex-direction:column;gap:6px}
+.rule b{font-family:var(--f-display);font-size:1.05rem}
+.rule span{font-size:.88rem;opacity:.85}
+.avoid{display:flex;flex-wrap:wrap;gap:8px}
+.avoid span{font-size:.85rem;padding:6px 11px;border-radius:7px;border:1px solid var(--alert);color:var(--alert);text-decoration:line-through;text-decoration-thickness:1px}
+
+footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}
+
+@media (max-width:760px){
+  .files,.score,.combos{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Hackathon Data Cempro · Cesuca · 09/11/2026</span>
+    <h1>Dos dados à <em>decisão</em> em 2 horas</h1>
+    <p class="lead">Uma empresa de software fictícia tem clientes, chamados e uso de serviços, mas não usa esses dados. A missão é encontrar um problema, risco ou oportunidade e mostrar um protótipo funcionando que ajude alguém a decidir melhor.</p>
+    <div class="meta"><span>Desenvolvimento <b>19:20–21:20</b></span><span>Pitch <b>5 min</b></span><span>Tecnologia <b>livre, IA permitida</b></span><span>Equipes <b>até 6 pessoas</b></span></div>
+  </header>
+
+  <!-- PIPELINE -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">O caminho</span>
+      <h2>Todo projeto vencedor segue esse fluxo</h2>
+    </div>
+    <div class="diagram" role="img" aria-label="Fluxo: três arquivos se juntam pelo cliente_id, viram um sinal (score, alerta, previsão) e terminam em uma ação para uma pessoa.">
+      <svg viewBox="0 0 900 300">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
+        </defs>
+        <!-- arquivos -->
+        <g>
+          <rect x="20" y="30" width="170" height="60" rx="10" fill="var(--surface)" stroke="var(--c-cli)" stroke-width="2"/>
+          <text x="40" y="57" font-weight="600" font-size="15">clientes.xlsx</text>
+          <text x="40" y="76" class="small">100 · porte, setor, cidade</text>
+          <rect x="20" y="120" width="170" height="60" rx="10" fill="var(--surface)" stroke="var(--c-ate)" stroke-width="2"/>
+          <text x="40" y="147" font-weight="600" font-size="15">atendimentos.xlsx</text>
+          <text x="40" y="166" class="small">300 · SLA, status, nota</text>
+          <rect x="20" y="210" width="170" height="60" rx="10" fill="var(--surface)" stroke="var(--c-uso)" stroke-width="2"/>
+          <text x="40" y="237" font-weight="600" font-size="15">uso_servicos.xlsx</text>
+          <text x="40" y="256" class="small">300 · acessos/mês</text>
+        </g>
+        <!-- linhas para join -->
+        <path class="flow" stroke="var(--c-cli)" d="M190,60 C250,60 250,150 300,150"/>
+        <path class="flow" stroke="var(--c-ate)" d="M190,150 L300,150"/>
+        <path class="flow" stroke="var(--c-uso)" d="M190,240 C250,240 250,150 300,150"/>
+        <!-- join -->
+        <g class="pulse">
+          <circle cx="345" cy="150" r="45" fill="var(--signal-soft)" stroke="var(--signal)" stroke-width="2"/>
+          <text x="345" y="146" text-anchor="middle" font-family="var(--f-mono)" font-size="12" font-weight="500">cliente_id</text>
+          <text x="345" y="163" text-anchor="middle" class="small">junta tudo</text>
+        </g>
+        <path class="flow" stroke="var(--accent)" d="M390,150 L470,150" marker-end="url(#ah)"/>
+        <!-- sinal -->
+        <rect x="475" y="100" width="170" height="100" rx="12" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="560" y="135" text-anchor="middle" font-weight="700" font-size="17">Sinal</text>
+        <text x="560" y="158" text-anchor="middle" class="small">score · alerta · previsão</text>
+        <text x="560" y="176" text-anchor="middle" class="small">ranking · segmento</text>
+        <path class="flow" stroke="var(--accent)" d="M645,150 L720,150" marker-end="url(#ah)"/>
+        <!-- ação -->
+        <rect x="725" y="95" width="155" height="110" rx="12" fill="var(--ink)"/>
+        <text x="802" y="133" text-anchor="middle" font-weight="700" font-size="17" fill="var(--bg)" style="fill:var(--bg)">Ação</text>
+        <text x="802" y="156" text-anchor="middle" font-size="12" style="fill:var(--bg);opacity:.8">quem faz o quê,</text>
+        <text x="802" y="173" text-anchor="middle" font-size="12" style="fill:var(--bg);opacity:.8">com quem, hoje</text>
+        <!-- ponto viajando -->
+        <circle r="5" fill="var(--signal)">
+          <animateMotion dur="3.2s" repeatCount="indefinite" path="M190,150 L300,150 L470,150 L560,150 L720,150 L800,150"/>
+        </circle>
+        <text x="560" y="250" text-anchor="middle" class="small">A banca quer ver o caminho inteiro funcionando, não só o gráfico.</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- DADOS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Matéria-prima</span>
+      <h2>Três arquivos, uma chave em comum</h2>
+    </div>
+    <div class="files">
+      <div class="file" style="--c:var(--c-cli)">
+        <div class="n">100</div><h3>clientes</h3>
+        <ul><li class="key">cliente_id</li><li>nome_ficticio</li><li>porte</li><li>setor</li><li>cidade</li><li>data_cadastro</li></ul>
+      </div>
+      <div class="file" style="--c:var(--c-ate)">
+        <div class="n">300</div><h3>atendimentos</h3>
+        <ul><li class="key">cliente_id</li><li>servico</li><li>assunto</li><li>canal</li><li>prioridade</li><li>status</li><li>tempo_resolucao_min</li><li>satisfacao_1_a_5</li></ul>
+      </div>
+      <div class="file" style="--c:var(--c-uso)">
+        <div class="n">300</div><h3>uso de serviços</h3>
+        <ul><li class="key">cliente_id</li><li>mes</li><li>servico</li><li>acessos</li><li>operacoes_realizadas</li></ul>
+      </div>
+    </div>
+    <p class="note">Chamados pendentes vêm com tempo e satisfação vazios. O dicionário pede para não inferir causalidade, então tratem os resultados como sinal de alerta, não como prova.</p>
+  </section>
+
+  <!-- AVALIAÇÃO -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Como a banca pontua</span>
+      <h2>Funcionar é metade do jogo</h2>
+    </div>
+    <div class="score">
+      <div class="bars">
+        <div class="bar"><div class="lbl"><span>Criatividade e inovação</span></div><div class="track"><div class="fill" style="--w:100%"></div></div><span class="pts">25</span></div>
+        <div class="bar"><div class="lbl"><span>Utilidade prática</span><span class="mono" style="font-size:.72rem;color:var(--muted)">2º desempate</span></div><div class="track"><div class="fill" style="--w:100%"></div></div><span class="pts">25</span></div>
+        <div class="bar hot"><div class="lbl"><span><b>Funcionamento do protótipo</b></span><span class="mono" style="font-size:.72rem;color:var(--signal)">1º desempate</span></div><div class="track"><div class="fill" style="--w:100%"></div></div><span class="pts">25</span></div>
+        <div class="bar"><div class="lbl"><span>Uso da tecnologia e dos dados</span></div><div class="track"><div class="fill" style="--w:60%"></div></div><span class="pts">15</span></div>
+        <div class="bar"><div class="lbl"><span>Clareza da apresentação</span></div><div class="track"><div class="fill" style="--w:40%"></div></div><span class="pts">10</span></div>
+      </div>
+      <div class="deliver">
+        <h3>O que entregar</h3>
+        <ol>
+          <li>Protótipo executável, local ou web</li>
+          <li>Descrição em até 5 frases: problema, público, solução</li>
+          <li>Código-fonte ou link do repositório</li>
+          <li>README com execução, dependências e limitações</li>
+          <li>Pitch de 5 min com demo ao vivo</li>
+        </ol>
+        <div><span class="tag">Não tem formulário</span> <span class="tag">Forma de entrega: confirmar na abertura</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IDEIAS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Mapa de possibilidades</span>
+      <h2>20 caminhos possíveis</h2>
+      <p class="lead">Filtre por tipo de solução. Os quadradinhos mostram quais arquivos cada ideia usa; as barras indicam o esforço. As bordas destacadas são as mais fortes para 2 horas.</p>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filtrar ideias por categoria"></div>
+    <div class="legend">
+      <span><span class="src" style="--c:var(--c-cli)">C</span>clientes</span>
+      <span><span class="src" style="--c:var(--c-ate)">A</span>atendimentos</span>
+      <span><span class="src" style="--c:var(--c-uso)">U</span>uso</span>
+      <span><span class="effort"><i class="on"></i><i></i><i></i></span>esforço</span>
+      <span><span class="effort risk"><i class="on"></i><i class="on"></i><i class="on"></i></span>arriscado em 2h</span>
+    </div>
+    <div class="ideas" id="ideas"></div>
+    <div class="layers">
+      <div class="layer">
+        <h3>IA generativa entra em qualquer ideia</h3>
+        <ul>
+          <li>Explica o score: "por que este cliente está em risco?"</li>
+          <li>Escreve a ação: e-mail, roteiro de ligação, resposta ao chamado</li>
+          <li>Resume: o cliente, a fila do dia, o mês</li>
+          <li>Sempre com fallback por template se a API falhar</li>
+        </ul>
+      </div>
+      <div class="layer">
+        <h3>Dashboard entra em qualquer ideia</h3>
+        <ul>
+          <li>KPIs no topo: clientes em risco, pendentes, nota média</li>
+          <li>Gráfico de uso mês a mês do cliente selecionado</li>
+          <li>Distribuição por serviço, canal ou setor</li>
+          <li>É a tela da demo: mostra o resultado do sinal de forma visual</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Plano em camadas</span>
+      <h2>Sempre ter uma versão que roda</h2>
+      <p class="lead">Com desenvolvimento assistido por IA o escopo pode crescer, mas em camadas. Cada camada termina demonstrável e com commit antes da próxima começar.</p>
+    </div>
+    <div class="timeline">
+      <div class="tl" style="--cols:12">
+        <span class="hour">19:00</span><span class="hour">19:20</span><span class="hour"></span><span class="hour">19:50</span><span class="hour"></span><span class="hour">20:30</span><span class="hour"></span><span class="hour"></span><span class="hour">21:00</span><span class="hour">21:20</span><span class="hour">21:30</span><span class="hour">22:10</span>
+
+        <div class="seg neutral" style="grid-column:1/2"><b>Regras</b><small>abertura</small></div>
+        <div class="seg c1 shine" style="grid-column:2/4"><b>Camada 1 · núcleo</b><small>dados carregados + score + ranking</small></div>
+        <div class="seg c2" style="grid-column:4/6"><b>Camada 2 · profundidade</b><small>visão 360, fila, segmentos</small></div>
+        <div class="seg c3" style="grid-column:6/9"><b>Camada 3 · uau com IA</b><small>ação sugerida, resumo, fallback</small></div>
+        <div class="seg freeze" style="grid-column:9/10"><b>Congelar</b><small>ensaio</small></div>
+        <div class="seg neutral" style="grid-column:10/11"><b>Auditório</b></div>
+        <div class="seg neutral" style="grid-column:11/13"><b>Pitches</b><small>1 + 3 + 1 min</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMBOS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Combinações fortes</span>
+      <h2>Ideias que se encaixam bem</h2>
+    </div>
+    <div class="combos">
+      <div class="combo">
+        <h3>Cliente em risco, ação pronta</h3>
+        <div class="chain"><span>Health score</span><span class="arr">→</span><span>Ranking de risco</span><span class="arr">→</span><span>Roteiro de contato com IA</span></div>
+        <p class="why">Usa os 3 arquivos, gera um número explicável e termina numa ação concreta para o time de sucesso do cliente.</p>
+      </div>
+      <div class="combo">
+        <h3>Suporte que prioriza sozinho</h3>
+        <div class="chain"><span>Fila inteligente</span><span class="arr">→</span><span>Alerta de SLA</span><span class="arr">→</span><span>Copiloto do atendente</span></div>
+        <p class="why">Ataca a dor do dia a dia do suporte: o que atender primeiro e como falar com aquele cliente.</p>
+      </div>
+      <div class="combo">
+        <h3>Gestor bem informado</h3>
+        <div class="chain"><span>Saúde por serviço</span><span class="arr">→</span><span>Segmentação</span><span class="arr">→</span><span>Resumo executivo com IA</span></div>
+        <p class="why">Começa num dashboard seguro e entrega a leitura pronta para quem decide.</p>
+      </div>
+      <div class="combo">
+        <h3>Crescer a receita</h3>
+        <div class="chain"><span>Uso por serviço</span><span class="arr">→</span><span>Clientes parecidos</span><span class="arr">→</span><span>Recomendação de upsell</span></div>
+        <p class="why">Olha para oportunidade em vez de problema, um ângulo que poucas equipes devem escolher.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGRAS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">Regras de ouro</span>
+      <h2>O que separa uma demo boa de uma que trava</h2>
+    </div>
+    <div class="rules">
+      <div class="rule"><span class="rn">REGRA 01</span><b>Rodar sempre</b><span>Cada mudança deixa o app executável de ponta a ponta.</span></div>
+      <div class="rule"><span class="rn">REGRA 02</span><b>Plano B para IA</b><span>Sem internet, a ação sugerida sai de um template.</span></div>
+      <div class="rule"><span class="rn">REGRA 03</span><b>Contrato antes</b><span>Combinem endpoints e JSON antes de dividir as frentes.</span></div>
+      <div class="rule"><span class="rn">REGRA 04</span><b>Saber explicar</b><span>A banca pode perguntar qualquer parte do código.</span></div>
+    </div>
+    <div class="avoid">
+      <span>Treinar modelo de ML com 300 linhas</span><span>Chat que gera SQL livre</span><span>Login e cadastro</span><span>Deploy complexo</span><span>Feature pela metade na demo</span>
+    </div>
+  </section>
+
+  <footer>Dados fictícios fornecidos pela Data Cempro para fins educacionais. Material de apoio para as equipes do Hackathon Data Cempro Cesuca 2026.</footer>
+</div>
+
+<script>
+const IDEAS=[
+ {c:"Prever / alertar",t:"Radar de churn",d:"Score de risco por cliente: queda de uso + pendências + nota baixa.",s:"CAU",e:2,top:1},
+ {c:"Prever / alertar",t:"Alerta de queda de uso",d:"Avisa quando o uso de um cliente cai X% de um mês para o outro.",s:"CU",e:1},
+ {c:"Prever / alertar",t:"Previsão de tempo de resolução",d:"Estima a demora de um chamado novo por assunto, canal e prioridade.",s:"A",e:2},
+ {c:"Prever / alertar",t:"Previsão de insatisfação",d:"Probabilidade de o chamado terminar com nota baixa.",s:"A",e:3,risk:1},
+ {c:"Priorizar",t:"Fila inteligente",d:"Reordena os pendentes por impacto real, não só pela prioridade informada.",s:"CA",e:1,top:1},
+ {c:"Priorizar",t:"Classificador de prioridade",d:"Compara a prioridade informada com a sugerida e aponta as divergências.",s:"A",e:2},
+ {c:"Priorizar",t:"Segmentação de clientes",d:"Grupos como engajado, silencioso, em risco, com uma ação para cada.",s:"CAU",e:2},
+ {c:"Recomendar",t:"Upsell e cross-sell",d:"Sugere serviços com base em clientes parecidos do mesmo setor e porte.",s:"CU",e:2},
+ {c:"Recomendar",t:"Health score 0–100",d:"Nota única por cliente com os fatores explicados.",s:"CAU",e:1,top:1},
+ {c:"Recomendar",t:"Onboarding em risco",d:"Clientes recentes com pouco uso ou muitos chamados.",s:"CAU",e:1},
+ {c:"IA generativa",t:"Pergunte aos dados",d:"Perguntas em português com respostas em tabela e gráfico, só para intents pré-definidas.",s:"CAU",e:3,risk:1},
+ {c:"IA generativa",t:"Resumo executivo",d:"Relatório do mês escrito por IA: o que mudou e o que fazer.",s:"CAU",e:2},
+ {c:"IA generativa",t:"Copiloto do atendente",d:"Histórico do cliente resumido e uma sugestão de abordagem.",s:"CA",e:2,top:1},
+ {c:"IA generativa",t:"Plano de ação de retenção",d:"Roteiro de ligação gerado para cada cliente em risco.",s:"CAU",e:2,top:1},
+ {c:"Dashboards",t:"Saúde por serviço",d:"Qual produto gera mais chamados, demora e insatisfação.",s:"AU",e:1},
+ {c:"Dashboards",t:"Eficiência por canal",d:"Tempo e satisfação por canal, com recomendação.",s:"A",e:1},
+ {c:"Dashboards",t:"Mapa por cidade e setor",d:"Onde os problemas se concentram.",s:"CA",e:1},
+ {c:"Dashboards",t:"Análise de SLA",d:"Percentual dentro do prazo e pendentes envelhecendo.",s:"A",e:1},
+ {c:"Automação",t:"Tarefas automáticas",d:"Regras que geram tarefas para o time de sucesso do cliente.",s:"CAU",e:2},
+ {c:"Automação",t:"Pesquisa direcionada",d:"Escolhe quem deve receber contato proativo ou pesquisa.",s:"CA",e:1}
+];
+IDEAS.forEach((i,k)=>i.n=k+1);
+const CATS=["Todas","Mais fortes",...new Set(IDEAS.map(i=>i.c))];
+const COLORS={C:"var(--c-cli)",A:"var(--c-ate)",U:"var(--c-uso)"};
+let current="Todas";
+const fEl=document.getElementById("filters"),iEl=document.getElementById("ideas");
+function renderFilters(){
+  fEl.innerHTML="";
+  CATS.forEach(c=>{const b=document.createElement("button");b.className="chip";b.type="button";b.id="f-"+c.replace(/\W+/g,"-");b.textContent=c;b.setAttribute("aria-pressed",c===current);b.onclick=()=>{current=c;renderFilters();renderIdeas()};fEl.appendChild(b)});
+}
+function renderIdeas(){
+  const list=IDEAS.filter(i=>current==="Todas"||(current==="Mais fortes"?i.top:i.c===current));
+  iEl.innerHTML=list.map((i,n)=>`
+    <article class="idea${i.top?" top":""}" style="--i:${n}">
+      <div class="ihead"><span class="num">${String(i.n).padStart(2,"0")}</span><span class="cat">${i.c}</span></div>
+      <h3>${i.t}</h3>
+      ${(i.c==="IA generativa"||i.c==="Dashboards")?`<span class="addon">+ combina com qualquer ideia</span>`:""}
+      <p>${i.d}</p>
+      <div class="foot">
+        <div class="srcs">${["C","A","U"].map(k=>`<span class="src${i.s.includes(k)?"":" off"}" style="--c:${COLORS[k]}" title="${k}">${k}</span>`).join("")}</div>
+        <div class="effort${i.risk?" risk":""}" title="esforço">${[1,2,3].map(x=>`<i class="${x<=i.e?"on":""}"></i>`).join("")}</div>
+      </div>
+    </article>`).join("");
+}
+renderFilters();renderIdeas();
+</script>
+
+</body></html>
