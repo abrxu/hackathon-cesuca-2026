@@ -1,1 +1,67 @@
+@import "@fontsource-variable/archivo/wdth.css";
 @import "tailwindcss";
+
+/*
+  Tokens provisórios do Radar de Clientes.
+  Quando o design system chegar em frontend/design, trocar os valores aqui
+  e o visual dos componentes em src/components/ui.jsx.
+*/
+@theme {
+  --font-sans: "Archivo Variable", system-ui, sans-serif;
+
+  --color-ink: #18202e;
+  --color-ink-soft: #4a5468;
+  --color-ink-faint: #7a8396;
+  --color-canvas: #eceff3;
+  --color-surface: #ffffff;
+  --color-line: #d5dae2;
+
+  --color-brand: #2b3a67;
+  --color-brand-soft: #e3e7f2;
+
+  --color-risk-alto: #b42318;
+  --color-risk-alto-soft: #fbe5e2;
+  --color-risk-atencao: #a15c07;
+  --color-risk-atencao-soft: #fcefd9;
+  --color-risk-saudavel: #2e7d4f;
+  --color-risk-saudavel-soft: #e1f2e7;
+
+  --color-ai: #6941c6;
+  --color-ai-soft: #f1ecfc;
+
+  --text-xs: 13px;
+  --text-sm: 14px;
+  --text-base: 15px;
+}
+
+@layer base {
+  html {
+    font-size: 15px;
+  }
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility font-display {
+  font-stretch: 125%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+
+@keyframes entrar {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
