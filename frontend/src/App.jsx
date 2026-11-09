@@ -14,8 +14,8 @@ export default function App() {
   }, []);
 
   return (
-    <main>
-      <h1>React + FastAPI + PostgreSQL</h1>
+    <main className="p-8 font-sans">
+      <h1 className="text-2xl font-bold mb-4">React + FastAPI + PostgreSQL</h1>
       {error && <p>Erro: {error}</p>}
       {data ? <pre>{JSON.stringify(data, null, 2)}</pre> : !error && <p>Carregando...</p>}
     </main>
