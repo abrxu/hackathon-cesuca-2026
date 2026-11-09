@@ -38,7 +38,8 @@ jobs:
       - name: Health check
         run: |
           for i in $(seq 1 30); do
-            curl -fsS https://hackathon.abrxu.com/api/health && exit 0
+            # Direto na origem: a Cloudflare responde 403 para IPs do GitHub Actions.
+            curl -fsS --resolve "hackathon.abrxu.com:443:${{ secrets.DEPLOY_HOST }}" https://hackathon.abrxu.com/api/health && exit 0
             sleep 5
           done
           exit 1
