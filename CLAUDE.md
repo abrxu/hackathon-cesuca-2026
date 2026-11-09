@@ -24,6 +24,22 @@ A cada mudança que altere como rodar, configurar ou usar a aplicação (novas d
 - Esta frente cuida de **backend (FastAPI), banco (PostgreSQL), IA/agente e ML**. O frontend (React/Vite) é de outro time.
 - O contrato entre as frentes é [docs/api-contract.md](docs/api-contract.md). Qualquer mudança de rota, campo ou enum atualiza esse arquivo no mesmo commit.
 - Não editar `frontend/` sem pedido explícito.
+- Módulos internos do backend e suas interfaces: [docs/backend-internals.md](docs/backend-internals.md).
+- `AGENTS.md` é symlink para este arquivo (Codex/ChatGPT); editar só o `CLAUDE.md`.
+
+## Git e segredos
+
+- Commits direto na `main`, com `git push` após cada etapa funcionando. Sem linha de co-autoria.
+- `.env` nunca é commitado (está no `.gitignore`). Variáveis novas vão para o `.env.example` sem valor secreto.
+- Sem `DEEPSEEK_API_KEY`, a IA responde pelo fallback de regras; a aplicação continua funcionando.
+
+## Rodar
+
+```bash
+cp .env.example .env   # preencher DEEPSEEK_API_KEY
+docker compose up --build
+```
+Backend em `http://localhost:8000` (docs em `/docs`), frontend em `http://localhost:5173`.
 
 ## Regras de domínio
 

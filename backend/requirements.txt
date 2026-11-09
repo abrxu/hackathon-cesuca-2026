@@ -1,3 +1,11 @@
 fastapi
 uvicorn[standard]
 psycopg[binary]
+openpyxl
+scikit-learn
+numpy
+PyJWT
+openai
+reportlab
+pytest
+httpx

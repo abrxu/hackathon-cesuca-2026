@@ -18,10 +18,17 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       CORS_ORIGIN: http://localhost:5173
+      DATA_DIR: /data
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4.1-flash}
     ports:
       - "8000:8000"
     volumes:
       - ./backend/app:/code/app
+      - ./backend/tests:/code/tests
+      - "./docs-hackathon/Arquivos de trabalho:/data:ro"
     depends_on:
       db:
         condition: service_healthy

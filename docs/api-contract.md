@@ -224,4 +224,27 @@ Response:
   "clientes": [ /* ClienteResumo[] opcional */ ]
 }
 ```
+### Streaming (SSE)
+
+`POST /clientes/{cliente_id}/acao/stream` e `POST /agente/perguntar/stream` recebem o mesmo corpo das versões normais e respondem `text/event-stream`:
+
+```
+event: meta
+data: {"fonte": "ia"}
+
+event: delta
+data: {"texto": "Cliente de porte médio "}
+
+event: fim
+data: { /* mesmo JSON da versão sem stream */ }
+```
+No fallback por regras vem `meta` com `"fonte": "regras"`, um único `delta` e o `fim`. Como é POST, use `fetch` + `ReadableStream` no frontend (não `EventSource`).
+
+### Modelo de churn simulado
+
+### `GET /modelo/churn-simulado`
+```json
+{ "disponivel": true, "amostras": 2000, "acuracia": 0.81, "coeficientes": { "engajamento": 1.9, "atrito": 1.2, "satisfacao": 0.8 } }
+```
+
 O agente só chama funções fixas do backend (`listar_clientes`, `detalhe_cliente`, `resumo_carteira`, `insights_produto`); nunca gera SQL.
