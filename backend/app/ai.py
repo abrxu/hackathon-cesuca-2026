@@ -392,6 +392,15 @@ def _agente_regras(store, pergunta: str, papel: str) -> dict:
     return {"fonte": "regras", "resposta": resp, "ferramentas_usadas": usadas, "clientes": top}
 
 
+_LIXO_TOOL = re.compile(r"DSML|<\s*[|｜]|function_calls|tool_call|<\s*/?\s*invoke|<\s*/?\s*parameter", re.I)
+
+
+def _texto_ok(txt: str) -> str:
+    """Descarta respostas com marcação crua de chamada de ferramenta (DeepSeek às vezes devolve DSML no content)."""
+    txt = (txt or "").strip()
+    return "" if _LIXO_TOOL.search(txt) else txt
+
+
 def perguntar(store, pergunta: str, papel: str) -> dict:
     try:
         cli = _client()
@@ -409,11 +418,11 @@ def perguntar(store, pergunta: str, papel: str) -> dict:
             ]
             usadas: list[str] = []
             coletados: list = []
-            for _ in range(2):
+            for _ in range(3):
                 r = cli.chat.completions.create(model=_model(), messages=msgs, tools=tools, temperature=0.2)
                 msg = r.choices[0].message
                 if not msg.tool_calls:
-                    txt = (msg.content or "").strip()
+                    txt = _texto_ok(msg.content)
                     if txt:
                         return {"fonte": "ia", "resposta": txt, "ferramentas_usadas": usadas,
                                 "clientes": _dedup(coletados, txt)}
@@ -431,8 +440,8 @@ def perguntar(store, pergunta: str, papel: str) -> dict:
                         usadas.append(t.function.name)
                     msgs.append({"role": "tool", "tool_call_id": t.id, "content": json.dumps(res, ensure_ascii=False, default=str)[:12000]})
             # iterações esgotadas: pede resposta final sem tools
-            r = cli.chat.completions.create(model=_model(), messages=msgs, temperature=0.2)
-            txt = (r.choices[0].message.content or "").strip()
+            r = cli.chat.completions.create(model=_model(), messages=msgs, tools=tools, tool_choice="none", temperature=0.2)
+            txt = _texto_ok(r.choices[0].message.content)
             if txt:
                 return {"fonte": "ia", "resposta": txt, "ferramentas_usadas": usadas, "clientes": _dedup(coletados, txt)}
     except Exception as e:  # noqa: BLE001
@@ -485,7 +494,7 @@ def resumo_executivo(store) -> str:
                 {"role": "system", "content": SYSTEM_BASE},
                 {"role": "user", "content": "Escreva um parágrafo executivo curto (até 90 palavras) para a diretoria com base nestes dados:\n"
                  + json.dumps(dados, ensure_ascii=False, default=str)}])
-            txt = (r.choices[0].message.content or "").strip()
+            txt = _texto_ok(r.choices[0].message.content)
             if txt:
                 return txt
     except Exception as e:  # noqa: BLE001
