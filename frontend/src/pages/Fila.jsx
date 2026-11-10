@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, fmt } from "../api/format.js";
 import {
   Button, EmptyState, ErrorState, FilterBar, PageHeader, SearchInput, Select, SkeletonRows, Th, faixaClasses,
-  filtrarPorBusca, rotuloOrdenacao, useData, useOrdenacao,
+  filtrarPorBusca, rotuloOrdenacao, useData, useLinhaClicavel, useOrdenacao, useOrdenacaoNaUrl, useParamsPersistidos,
 } from "../components/ui.jsx";
 
 const SERVICOS = ["Sistema Alfa", "Sistema Beta", "Portal Web", "Aplicativo Mobile"];
@@ -48,7 +48,8 @@ const CAMPOS_BUSCA = [
 ];
 
 export default function Fila() {
-  const [params, setParams] = useSearchParams();
+  const [params, setParams] = useParamsPersistidos("fila");
+  const linha = useLinhaClicavel();
   const ordem = params.get("ordem") ?? "inteligente";
   const busca = params.get("busca") ?? "";
   const sugerida = params.get("sugerida") ?? undefined;
@@ -63,7 +64,7 @@ export default function Fila() {
     );
     return filtrarPorBusca(porCampos, busca, CAMPOS_BUSCA);
   }, [data, busca, sugerida, faixa]);
-  const ord = useOrdenacao(encontrados, COLUNAS);
+  const ord = useOrdenacao(encontrados, COLUNAS, useOrdenacaoNaUrl(params, setParams));
 
   function atualizar(campo, valor) {
     setParams((p) => {
@@ -74,7 +75,6 @@ export default function Fila() {
   }
 
   function limpar() {
-    ord.limpar();
     setParams(ordem === "inteligente" ? {} : { ordem }, { replace: true });
   }
 
@@ -95,15 +95,15 @@ export default function Fila() {
       >
         <div className="inline-flex rounded-control border border-ink bg-surface p-0.5" role="radiogroup" aria-label="Ordem da fila">
           {[["inteligente", "Ordem inteligente"], ["chegada", "Ordem de chegada"]].map(([v, l]) => {
-            const marcado = ordem === v && !ord.ordem;
+            const marcado = ordem === v;
             return (
               <button
                 key={v}
                 type="button"
                 role="radio"
                 aria-checked={marcado}
-                onClick={() => { ord.limpar(); atualizar("ordem", v === "inteligente" ? undefined : v); }}
-                className={`min-h-9 rounded-[0.375rem] px-3.5 py-1.5 text-sm font-bold ${marcado ? "bg-ink text-canvas" : ordem === v ? "bg-brand-soft text-ink" : "text-ink hover:underline"}`}
+                onClick={() => atualizar("ordem", v === "inteligente" ? undefined : v)}
+                className={`min-h-9 rounded-[0.375rem] px-3.5 py-1.5 text-sm font-bold ${marcado ? "bg-ink text-canvas" : "text-ink hover:underline"}`}
               >
                 {l}
               </button>
@@ -164,14 +164,14 @@ export default function Fila() {
                 const a = it.atendimento;
                 const c = faixaClasses(it.cliente.faixa);
                 return (
-                  <tr key={a.atendimento_id} className="hover:bg-brand-soft">
+                  <tr key={a.atendimento_id} {...linha(`/clientes/${it.cliente.cliente_id}`)}>
                     <td className="py-2.5 pl-5 pr-3 font-semibold">{it.posicao}</td>
                     <td className="px-3 py-2.5 text-ink-soft">{a.atendimento_id}</td>
                     <td className="px-3 py-2.5">
                       <Link to={`/clientes/${it.cliente.cliente_id}`} className="font-semibold whitespace-nowrap hover:underline">{it.cliente.nome}</Link>
                     </td>
                     <td className="px-3 py-2.5 text-right">
-                      <span className={`rounded-full px-1.5 py-px text-xs font-bold ${c.bg} ${c.on}`} title={FAIXA_LABEL[it.cliente.faixa]}>{fmt.num(it.cliente.score)}</span>
+                      <span className={`rounded-full border px-1.5 py-px text-xs font-bold ${c.pill}`} title={FAIXA_LABEL[it.cliente.faixa]}>{fmt.num(it.cliente.score)}</span>
                     </td>
                     <td className="px-3 py-2.5">{a.assunto}</td>
                     <td className="px-3 py-2.5 text-ink-soft">{a.servico}</td>

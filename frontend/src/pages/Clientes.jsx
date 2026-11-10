@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
 import {
   BotoesRelatorio, Button, EmptyState, ErrorState, FilterBar, PageHeader, PerfilPill, RiskPill, ScoreBar, SearchInput, Select,
-  SkeletonRows, Sparkline, Th, filtrarPorBusca, rotuloOrdenacao, useData, useOrdenacao,
+  SkeletonRows, Sparkline, Th, filtrarPorBusca, rotuloOrdenacao, useData, useLinhaClicavel, useOrdenacao, useOrdenacaoNaUrl,
+  useParamsPersistidos,
 } from "../components/ui.jsx";
 
 const OPCOES = {
@@ -49,7 +50,8 @@ const CAMPOS_BUSCA = [
 
 export default function Clientes() {
   const { usuario } = useAuth();
-  const [params, setParams] = useSearchParams();
+  const [params, setParams] = useParamsPersistidos("clientes");
+  const linha = useLinhaClicavel();
   const busca = params.get("busca") ?? "";
   // Filtros de combobox vão para o backend; busca e ordenação são locais.
   const filtros = Object.fromEntries(CAMPOS.filter((c) => params.get(c)).map((c) => [c, params.get(c)]));
@@ -57,7 +59,7 @@ export default function Clientes() {
   const { data, error, loading, reload } = useData(() => api.clientes(filtros), [chave]);
 
   const encontrados = useMemo(() => filtrarPorBusca(data?.itens, busca, CAMPOS_BUSCA), [data, busca]);
-  const ord = useOrdenacao(encontrados, COLUNAS);
+  const ord = useOrdenacao(encontrados, COLUNAS, useOrdenacaoNaUrl(params, setParams));
 
   function atualizar(campo, valor) {
     setParams((p) => {
@@ -68,7 +70,6 @@ export default function Clientes() {
   }
 
   function limpar() {
-    ord.limpar();
     setParams({}, { replace: true });
   }
 
@@ -132,7 +133,7 @@ export default function Clientes() {
             </thead>
             <tbody className="divide-y divide-line">
               {ord.ordenados.map((c) => (
-                <tr key={c.cliente_id} className="hover:bg-brand-soft">
+                <tr key={c.cliente_id} {...linha(`/clientes/${c.cliente_id}`)}>
                   <td className="py-2.5 pl-5 pr-3">
                     <Link to={`/clientes/${c.cliente_id}`} className="font-semibold hover:underline">{c.nome}</Link>
                     <span className="block text-xs text-ink-soft">
@@ -148,9 +149,7 @@ export default function Clientes() {
                   <td className="px-3 py-2.5"><Sparkline valores={(c.uso_total ?? []).map((u) => u.acessos)} faixa={c.faixa} /></td>
                   <td className="px-3 py-2.5 text-right">{fmt.num(c.pendentes)}</td>
                   <td className="px-3 py-2.5 text-right">{fmt.nota(c.satisfacao_media)}</td>
-                  <td className="px-5 py-2.5 text-right">
-                    <Link to={`/clientes/${c.cliente_id}`} className="text-sm font-semibold text-ink underline underline-offset-4 hover:no-underline">Abrir</Link>
-                  </td>
+                  <td className="px-5 py-2.5 text-right text-lg text-ink-soft" aria-hidden>›</td>
                 </tr>
               ))}
             </tbody>

@@ -93,7 +93,8 @@ function Cabecalho({ data, loading, onAcao }) {
             <span key={s} className="rounded-full border border-ink bg-canvas px-2.5 py-0.5 text-sm text-ink">{SINAL_LABEL(s)}</span>
           ))}
           {data.contatado_em && (
-            <span className="rounded-full bg-risk-saudavel px-2.5 py-0.5 text-sm font-bold text-ink">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-risk-saudavel bg-risk-saudavel-soft px-2.5 py-0.5 text-sm font-bold text-ink">
+              <span className="text-[0.7em] text-risk-saudavel" aria-hidden>●</span>
               {contatadoPor(data)}
             </span>
           )}

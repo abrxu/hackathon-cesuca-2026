@@ -1,15 +1,26 @@
 // Componentes visuais do Radar, seguindo o manual de identidade visual (frontend/design).
 // As telas só usam estes componentes e os tokens de src/index.css.
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
 
-// Manual: vermelho sobre fundo claro passa AA; âmbar e verde só como marca gráfica,
-// com rótulo em azul-noite (on). Símbolo + texto reforçam a leitura sem depender da cor.
+// Manual: vermelho sólido com texto claro passa AA; âmbar e verde não têm contraste
+// suficiente como fundo, então viram fundo suave + borda na cor + texto azul-noite,
+// com o símbolo colorido. Símbolo + texto reforçam a leitura sem depender da cor.
 const FAIXA_CLASSES = {
-  alto: { text: "text-risk-alto", bg: "bg-risk-alto", soft: "bg-risk-alto-soft", on: "text-canvas", simbolo: "▲" },
-  atencao: { text: "text-risk-atencao", bg: "bg-risk-atencao", soft: "bg-risk-atencao-soft", on: "text-ink", simbolo: "◆" },
-  saudavel: { text: "text-risk-saudavel", bg: "bg-risk-saudavel", soft: "bg-risk-saudavel-soft", on: "text-ink", simbolo: "●" },
+  alto: {
+    text: "text-risk-alto", bg: "bg-risk-alto", soft: "bg-risk-alto-soft", on: "text-canvas", simbolo: "▲",
+    pill: "border-risk-alto bg-risk-alto text-white", marca: "text-white",
+  },
+  atencao: {
+    text: "text-risk-atencao", bg: "bg-risk-atencao", soft: "bg-risk-atencao-soft", on: "text-ink", simbolo: "◆",
+    pill: "border-risk-atencao bg-risk-atencao-soft text-ink", marca: "text-risk-atencao",
+  },
+  saudavel: {
+    text: "text-risk-saudavel", bg: "bg-risk-saudavel", soft: "bg-risk-saudavel-soft", on: "text-ink", simbolo: "●",
+    pill: "border-risk-saudavel bg-risk-saudavel-soft text-ink", marca: "text-risk-saudavel",
+  },
 };
 export const faixaClasses = (faixa) => FAIXA_CLASSES[faixa] ?? FAIXA_CLASSES.saudavel;
 
@@ -17,8 +28,8 @@ export const faixaClasses = (faixa) => FAIXA_CLASSES[faixa] ?? FAIXA_CLASSES.sau
 export function RiskPill({ faixa }) {
   const c = faixaClasses(faixa);
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-sm font-bold whitespace-nowrap ${c.bg} ${c.on}`}>
-      <span className="text-[0.7em]" aria-hidden>{c.simbolo}</span>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-sm font-bold whitespace-nowrap ${c.pill}`}>
+      <span className={`text-[0.7em] ${c.marca}`} aria-hidden>{c.simbolo}</span>
       {FAIXA_LABEL[faixa] ?? fmt.dash}
     </span>
   );
@@ -188,8 +199,10 @@ function comparar(a, b) {
 
 // Ordenação local por coluna. colunas = { id: { get: (item) => valor, primeiro: "asc" | "desc" } }.
 // Clique alterna: primeira direção → oposta → ordem original. Valores vazios ficam sempre no fim.
-export function useOrdenacao(itens, colunas, inicial = null) {
-  const [ordem, setOrdem] = useState(inicial);
+// controle opcional = [ordem, setOrdem] (ex.: useOrdenacaoNaUrl) para a ordenação sobreviver à navegação.
+export function useOrdenacao(itens, colunas, controle) {
+  const local = useState(null);
+  const [ordem, setOrdem] = controle ?? local;
   const ordenados = useMemo(() => {
     const lista = itens ?? [];
     const col = ordem && colunas[ordem.id];
@@ -216,6 +229,64 @@ export function useOrdenacao(itens, colunas, inicial = null) {
     });
   }
   return { ordenados, ordem, alternar, limpar: () => setOrdem(null), th: (id) => ({ id, ordem, onOrdenar: alternar }) };
+}
+
+// Ordenação guardada no parâmetro ?ordenar=coluna:dir da URL.
+export function useOrdenacaoNaUrl(params, setParams) {
+  const bruto = params.get("ordenar") ?? "";
+  const [id, dir] = bruto.split(":");
+  const ordem = id && (dir === "asc" || dir === "desc") ? { id, dir } : null;
+  function setOrdem(valor) {
+    const nova = typeof valor === "function" ? valor(ordem) : valor;
+    setParams((p) => {
+      const n = new URLSearchParams(p);
+      nova ? n.set("ordenar", `${nova.id}:${nova.dir}`) : n.delete("ordenar");
+      return n;
+    }, { replace: true });
+  }
+  return [ordem, setOrdem];
+}
+
+// useSearchParams que lembra filtros, busca e ordenação da tela durante a sessão:
+// ao voltar para a tela sem parâmetros (menu, "Voltar para a lista"), restaura o último estado.
+// Só o usuário remove um filtro (chip, "Todos" ou "Limpar tudo").
+export function useParamsPersistidos(chave) {
+  const [params, setParams] = useSearchParams();
+  const k = `radar.filtros.${chave}`;
+  const [restaurar] = useState(() => {
+    if (params.toString()) return null;
+    try { return sessionStorage.getItem(k) || null; } catch { return null; }
+  });
+  const pendente = useRef(Boolean(restaurar));
+  useEffect(() => {
+    if (restaurar) setParams(new URLSearchParams(restaurar), { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const atual = params.toString();
+  useEffect(() => {
+    // Enquanto a restauração não chegou à URL, não sobrescreve o que foi guardado.
+    if (pendente.current) {
+      if (!atual) return;
+      pendente.current = false;
+    }
+    try { sessionStorage.setItem(k, atual); } catch { /* sem storage */ }
+  }, [k, atual]);
+  return [params, setParams];
+}
+
+// Linha de tabela que abre um destino ao clicar em qualquer ponto dela.
+// Links e botões dentro da linha mantêm o próprio comportamento; Ctrl/Cmd abre em nova aba.
+export function useLinhaClicavel() {
+  const navigate = useNavigate();
+  return (destino) => ({
+    onClick: (e) => {
+      if (e.target.closest("a, button, input, select, [role=listbox]")) return;
+      if (window.getSelection()?.toString()) return;
+      if (e.metaKey || e.ctrlKey) window.open(destino, "_blank");
+      else navigate(destino);
+    },
+    className: "cursor-pointer hover:bg-brand-soft",
+  });
 }
 
 function IconeOrdem({ dir }) {
