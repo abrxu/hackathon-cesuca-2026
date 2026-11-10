@@ -9,7 +9,7 @@ Versão para o telão, com notas do apresentador e cronômetro: [pitch-guia.html
 1. Empresas de software B2B perdem clientes sem perceber a tempo: antes de cancelar, o cliente para de usar o sistema, acumula chamados e dá notas baixas, mas esses sinais ficam espalhados em bases diferentes.
 2. O Radar de Clientes junta uso, atendimentos e cadastro em um score de risco explicável, separado em três facetas: engajamento, atrito e satisfação.
 3. O Analista de Customer Success recebe todo dia a lista de quem contatar primeiro e, para cada cliente, uma ação sugerida com roteiro escrito por IA.
-4. O Gestor vê a carteira de cima: onde o risco se concentra, se o time está cobrindo os clientes em alto risco e onde o produto gera mais problemas, e exporta relatórios em Excel e PDF para a diretoria.
+4. O Gestor vê a carteira de cima: quantos clientes estão em risco, se o time está cobrindo os de alto risco, que ação em escala cada perfil pede e onde o produto gera mais problemas, e exporta relatórios em Excel e PDF para a diretoria.
 5. O score é feito por regras auditáveis, a IA só explica e escreve, e sem internet o sistema continua funcionando com sugestões por regras.
 
 ## Critérios da banca (quadro do evento)
@@ -38,7 +38,7 @@ O enunciado pede soluções que **informam, automatizam, preveem, organizam, pri
 | Tempo | Conteúdo |
 |---|---|
 | 0:00–1:00 | **Problema e público.** Retenção é a receita de quem vende software por assinatura. Os sinais existem nos dados, mas ninguém junta. Público: Analista de CS (L1) e Gestor (L2). |
-| 1:00–4:00 | **Demo.** Login do analista → painel ("10 clientes em alto risco") → lista ordenada → cliente C022 (score 98: as facetas somam o score) → "Gerar ação sugerida" (roteiro de ligação pela IA) → "Marcar como contatado" (fica registrado quem e quando). Fila de atendimentos: o chamado do C022 sobe por causa do risco do cliente. Login do gestor → visão do gestor: "o uso total está estável (−1%), mas os clientes em risco caíram 25%; o total esconde a queda" → cobertura do alto risco já mostra o contato do C022 feito pela analista → 23 de 40 chamados pendentes há mais de 30 dias → mapa serviço × assunto → baixar PDF para a diretoria. |
+| 1:00–4:00 | **Demo.** Login do analista → painel ("10 clientes em alto risco") → lista ordenada → cliente C022 (score 98: as facetas somam o score) → "Gerar ação sugerida" (roteiro de ligação pela IA) → "Marcar como contatado" (fica registrado quem e quando). Fila de atendimentos: o chamado do C022 sobe por causa do risco do cliente. Login do gestor → visão do gestor: 48 clientes em risco → "1 de 10" alto risco contatado (o C022 que a analista acabou de marcar) → perfis viram ação em escala ("10 travados: força-tarefa de suporte") → top 3 de atrito do produto → baixar PDF para a diretoria. |
 | 4:00–5:00 | **Resultados, limitações e próximo passo.** Números abaixo, limitações honestas e integração com o helpdesk real. |
 
 ## Frases que conectam com a Data Cempro
@@ -70,7 +70,7 @@ O enunciado pede soluções que **informam, automatizam, preveem, organizam, pri
 | IA só explica e escreve | IA decide o risco | Decisão auditável fica nas regras; a IA acelera o trabalho do analista. |
 | Agente com funções fixas | Chat que gera SQL | Mais seguro e não quebra ao vivo. |
 | Dois papéis com login | Acesso único | Separa operação (analista) de gestão (gestor); a diretoria recebe relatório, não acessa o sistema. |
-| Tela do gestor com indicadores de carteira | Mesmo painel do analista com outro filtro | O analista decide conta a conta; o gestor decide onde intervir: tendência (uso em risco × saudável), concentração por segmento, cobertura do time e idade dos chamados, problema de produto. Segue a prática de CS de separar a visão da linha de frente da visão de liderança. |
+| Tela do gestor com indicadores de carteira | Mesmo painel do analista com outro filtro | O analista decide conta a conta; o gestor decide onde intervir: carteira em risco, cobertura do time, ação por perfil e problema de produto. Tela enxuta de propósito: três leituras, detalhe no PDF/Excel da diretoria. Segue a prática de CS de separar a visão da linha de frente da visão de liderança. |
 
 ## Perguntas prováveis da banca
 
