@@ -252,6 +252,24 @@ td b{white-space:nowrap}
   <div class="foot"><span>Hackathon Data Cempro · Cesuca 2026</span><span>8</span></div>
 </section>
 
+<!-- REGRAS DO DESAFIO -->
+<section class="slide">
+  <div class="kicker">Regras do desafio</div>
+  <h2 style="margin-bottom:22px">O que o regulamento e o enunciado pedem, e como cumprimos.</h2>
+  <table>
+    <tr><th style="width:40%">Regra (regulamento e enunciado)</th><th>Como o Radar cumpre</th></tr>
+    <tr><td><b>Usar pelo menos um dos arquivos fornecidos</b></td><td>Usa os três: clientes, atendimentos e uso de serviços, unidos pelo código do cliente.</td></tr>
+    <tr><td><b>Sem dados reais, pessoais ou sistemas produtivos</b></td><td>Só as planilhas fictícias do desafio; nenhum nome de cliente é enviado à IA.</td></tr>
+    <tr><td><b>IA generativa e código aberto permitidos, com identificação</b></td><td>DeepSeek e bibliotecas abertas listadas no README.</td></tr>
+    <tr><td><b>Não inferir causalidade</b> (dicionário de dados)</td><td>O score é sinal de alerta, não previsão de cancelamento.</td></tr>
+    <tr><td><b>Pendentes vêm sem tempo e sem nota</b></td><td>Valor ausente fica vazio, nunca vira zero.</td></tr>
+    <tr><td><b>Protótipo executável, local ou web</b></td><td>Roda local em Docker e está publicado na web.</td></tr>
+    <tr><td><b>Descrição em até 5 frases, código-fonte e README</b></td><td>Entregues no repositório, com execução, dependências e limitações.</td></tr>
+    <tr><td><b>Explicar e demonstrar o que foi implementado</b></td><td>Score por regras auditáveis: cada ponto tem um motivo visível.</td></tr>
+  </table>
+  <div class="foot"><span>Fontes: regulamento, enunciado do desafio e dicionário de dados</span><span>9</span></div>
+</section>
+
 <!-- 11 POR QUE ESSAS ESCOLHAS -->
 <section class="slide">
   <div class="kicker">Por que essas escolhas</div>
@@ -266,7 +284,7 @@ td b{white-space:nowrap}
     <tr><td><b>Agente com funções fixas</b></td><td>Chat que gera SQL</td><td>Mais seguro e não quebra ao vivo.</td></tr>
     <tr><td><b>Dois papéis com login</b></td><td>Acesso único</td><td>Separa operação (analista) de gestão (gestor).</td></tr>
   </table>
-  <div class="foot"><span>Decisões do time</span><span>9</span></div>
+  <div class="foot"><span>Decisões do time</span><span>10</span></div>
 </section>
 
 <!-- 12 TECNOLOGIA -->
@@ -287,7 +305,7 @@ td b{white-space:nowrap}
     <div class="card"><h3>Qualidade</h3><p>19 testes (pytest): carga, score, rotas, permissões, IA com reserva, relatórios.</p></div>
     <div class="card"><h3>Segurança</h3><p><code>.env</code> fora do git; para a IA vão código do cliente e métricas, nunca o nome.</p></div>
   </div>
-  <div class="foot"><span>Tudo em Docker, do banco ao navegador</span><span>10</span></div>
+  <div class="foot"><span>Tudo em Docker, do banco ao navegador</span><span>11</span></div>
 </section>
 
 </div></div>
