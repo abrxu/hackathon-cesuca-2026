@@ -89,8 +89,8 @@ O enunciado pede soluções que **informam, automatizam, preveem, organizam, pri
 **Professor (engenharia, segurança, DevOps)**
 - *Segredos?* `.env` fora do git; chave da IA e segredo do JWT por variável de ambiente (GitHub Secrets no deploy). Usuários de teste existem só para a demo.
 - *Dados enviados para a IA (LGPD)?* Só o código do cliente e métricas; nunca o nome. Sem chave ou sem internet, nada sai do servidor.
-- *Testes e observabilidade?* 18 testes automatizados (pytest) cobrindo carga, score, rotas, permissões, IA com fallback e relatórios. `/api/health` informa banco e carga sem derrubar a API.
-- *Resiliência?* Timeout de 5 s sem retentativa na IA; qualquer falha cai para regras. Valor ausente é `null`, nunca 0.
+- *Testes e observabilidade?* 19 testes automatizados (pytest) cobrindo carga, score, rotas, permissões, IA com fallback e relatórios. `/api/health` informa banco e carga sem derrubar a API.
+- *Resiliência?* Timeout de 12 s sem retentativa na IA; qualquer falha cai para regras. Valor ausente é `null`, nunca 0.
 
 ## Limitações (falar no último minuto)
 
