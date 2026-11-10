@@ -20,6 +20,19 @@ SYSTEM_BASE = (
 )
 
 
+SYSTEM_CHAT = (
+    SYSTEM_BASE.split(" Responda em texto simples")[0]
+    + " Refira-se aos clientes pelo código (ex.: C022). Formate a resposta em Markdown, seguindo este padrão: "
+    "1) comece com uma frase curta que responde direto à pergunta, com o número principal em **negrito**; "
+    "2) para 3 ou mais clientes, use uma tabela com as colunas | Cliente | Score | Faixa | Motivo | (inclua Perfil só se a pergunta não filtrou por perfil) "
+    "(no máximo 8 linhas; se houver mais, diga quantos ficaram de fora); "
+    "3) para 1 ou 2 clientes ou para fatos soltos, use lista com hífen, um item por linha e sem frases longas; "
+    "4) quando houver comparação entre serviços ou categorias, use tabela; "
+    "5) se fizer sentido, termine com uma linha 'Próximo passo:' com uma ação objetiva. "
+    "Não use títulos # nem ##; no máximo ### para separar blocos. Escreva faixas como Alto, Atenção ou Saudável."
+)
+
+
 def _model() -> str:
     return os.getenv("DEEPSEEK_MODEL") or "deepseek-flash"
 
@@ -385,7 +398,7 @@ def perguntar(store, pergunta: str, papel: str) -> dict:
         if cli is not None:
             tools = TOOLS_BASE + ([TOOL_INSIGHTS] if papel == "gestor" else [])
             msgs = [
-                {"role": "system", "content": SYSTEM_BASE + " Use as ferramentas para consultar a carteira antes de responder; "
+                {"role": "system", "content": SYSTEM_CHAT + " Use as ferramentas para consultar a carteira antes de responder; "
                  "nunca invente clientes ou números. Seja conciso. "
                  "listar_clientes devolve no máximo alguns itens: o total real está em total_na_carteira_com_filtros; "
                  "nunca deduza o tamanho da carteira pela quantidade de itens listados. "

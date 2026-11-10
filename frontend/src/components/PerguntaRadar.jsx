@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import Markdown from "./Markdown.jsx";
 import { api } from "../api/client.js";
 
 const NOME = "Eco";
@@ -66,7 +66,7 @@ export default function PerguntaRadar() {
 
   const tamanho = expandido
     ? "inset-4 sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(85vh,820px)] sm:w-[min(720px,calc(100vw-3rem))]"
-    : "inset-x-4 bottom-4 h-[70vh] sm:inset-x-auto sm:bottom-6 sm:right-6 sm:h-[560px] sm:w-[400px]";
+    : "inset-x-4 bottom-4 h-[70vh] sm:inset-x-auto sm:bottom-6 sm:right-6 sm:h-[560px] sm:w-[460px]";
 
   return (
     <div role="dialog" aria-label={`${NOME}, assistente do Radar`} className={`fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-ink/10 bg-canvas shadow-2xl ${tamanho}`}>
@@ -103,18 +103,7 @@ export default function PerguntaRadar() {
         )}
         {msgs.map((m, i) => (
           <Balao key={i} de={m.de} erro={m.erro}>
-            <p className="whitespace-pre-line">{m.texto}</p>
-            {m.clientes?.length > 0 && (
-              <ul className="mt-2 flex flex-wrap gap-1.5">
-                {m.clientes.map((c) => (
-                  <li key={c.cliente_id}>
-                    <Link to={`/clientes/${c.cliente_id}`} className="inline-block rounded-full border border-ink/20 bg-canvas px-2.5 py-0.5 text-xs font-semibold text-ink hover:underline">
-                      {c.nome} ({c.cliente_id})
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {m.de === "eco" && !m.erro ? <Markdown>{m.texto}</Markdown> : <p className="whitespace-pre-line">{m.texto}</p>}
           </Balao>
         ))}
         {loading && (
@@ -151,7 +140,7 @@ function Balao({ de, erro, children }) {
   return (
     <div className={`flex items-end gap-2 ${eco ? "" : "justify-end"}`}>
       {eco && <EcoIcon size={28} className="shrink-0 text-ai" />}
-      <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${eco ? (erro ? "rounded-bl-sm bg-canvas text-risk-alto" : "rounded-bl-sm bg-canvas text-ink shadow-sm") : "rounded-br-sm bg-ai text-white"}`}>
+      <div className={`max-w-[88%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${eco ? "min-w-0 flex-1 " : ""}${eco ? (erro ? "rounded-bl-sm bg-canvas text-risk-alto" : "rounded-bl-sm bg-canvas text-ink shadow-sm") : "rounded-br-sm bg-ai text-white"}`}>
         {children}
       </div>
     </div>
