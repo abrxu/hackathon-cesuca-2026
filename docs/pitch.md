@@ -2,6 +2,8 @@
 
 Material de apoio para montar a apresentação de 5 minutos. Vocabulário em [GLOSSARY.md](../GLOSSARY.md).
 
+Versão para o telão, com notas do apresentador e cronômetro: [pitch-guia.html](pitch-guia.html) (abrir no navegador; ← → navega, N notas, T cronômetro, F tela cheia).
+
 ## Descrição em 5 frases (entregável obrigatório)
 
 1. Empresas de software B2B perdem clientes sem perceber a tempo: antes de cancelar, o cliente para de usar o sistema, acumula chamados e dá notas baixas, mas esses sinais ficam espalhados em bases diferentes.
