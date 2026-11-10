@@ -95,30 +95,18 @@ td b{white-space:nowrap}
 .qa .a{font-size:21px;line-height:1.4;color:var(--ink-soft)}
 
 /* presenter UI */
-#notes{position:fixed;right:0;top:0;bottom:0;width:430px;background:#111827;color:#e5e7eb;padding:22px 24px 90px;overflow:auto;display:none;z-index:5;border-left:1px solid #1f2937}
-#notes h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin:16px 0 8px}
-#notes p,#notes li{font-size:16px;line-height:1.5;color:#e5e7eb}
-#notes ul{padding-left:18px}
-#notes b,#notes code{color:#fff}
-#notes .say{border-left:3px solid #818cf8;padding-left:10px;font-style:italic;margin:8px 0}
-#clock{font-size:46px;font-weight:750;font-variant-numeric:tabular-nums;color:#fff}
-#clock.late{color:#f87171}
-#budget{font-size:14px;color:#94a3b8;margin-top:2px}
-body.notes #stage{right:430px}
 #hud{position:fixed;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.06);z-index:4}
 #hud i{display:block;height:100%;background:#818cf8;width:0;transition:width .3s}
-#help{position:fixed;left:14px;bottom:14px;font-size:13px;color:#64748b;z-index:4;font-family:inherit;transition:opacity .4s}
 .navbtn{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:80px;border:0;background:transparent;color:#475569;font-size:34px;cursor:pointer;z-index:3}
 .navbtn:hover{color:#cbd5e1}
-#prev{left:0} #next{right:0} body.notes #next{right:430px}
-@media (max-width:700px){#notes{width:100%;top:50%} body.notes #stage{right:0;bottom:50%} body.notes #next{right:0}}
+#prev{left:0} #next{right:0}
 </style>
 </head>
 <body>
 <div id="stage"><div id="deck">
 
 <!-- 1 CAPA -->
-<section class="slide dark cover" data-min="0:00" data-end="0:20">
+<section class="slide dark cover">
   <svg class="radar" width="760" height="760" viewBox="0 0 760 760" aria-hidden="true">
     <g fill="none" stroke="#334155" stroke-width="2">
       <circle cx="380" cy="380" r="360"/><circle cx="380" cy="380" r="260"/><circle cx="380" cy="380" r="160"/><circle cx="380" cy="380" r="60"/>
@@ -133,16 +121,11 @@ body.notes #stage{right:430px}
   <h1 style="margin-top:22px">Radar de Clientes</h1>
   <p class="sub">Com quem o time de Customer Success precisa falar <b>hoje</b>, por quê, e o que dizer.</p>
   <div class="foot"><span>Uso · Atendimentos · Cadastro → Sinal → Ação</span><span>1</span></div>
-  <aside class="notes">
-    <h4>Abertura (20 s)</h4>
-    <p class="say">"Quem vende software por assinatura vive de renovação. Antes de cancelar, o cliente avisa: para de usar, acumula chamado e dá nota baixa. Só que ninguém junta esses sinais."</p>
-    <ul><li>Não ler o slide. Falar olhando para a banca.</li><li>Já deixar o navegador aberto no login, em outra aba.</li></ul>
-  </aside>
 </section>
 
 <!-- 2 PROBLEMA -->
-<section class="slide" data-min="0:20" data-end="0:50">
-  <div class="kicker">Problema e público <span class="t">0:20 – 0:50</span></div>
+<section class="slide">
+  <div class="kicker">Problema e público</div>
   <h2>Os sinais de que um cliente vai embora já estão nos dados. Estão espalhados em três planilhas.</h2>
   <div class="grid3 grow" style="align-content:start">
     <div class="card"><div class="big alto">51</div><div class="lbl">de 100 clientes usaram menos o sistema em setembro do que em julho</div></div>
@@ -154,18 +137,11 @@ body.notes #stage{right:430px}
     <div class="card" style="border-color:var(--ink)"><span class="role">Público 2 · Gestor de CS</span><p style="margin-top:8px">Precisa ver <b>onde intervir</b> na carteira e levar um relatório para a diretoria.</p></div>
   </div>
   <div class="foot"><span>Dados oficiais do desafio: 100 clientes, 300 atendimentos, uso jul–set/2026</span><span>2</span></div>
-  <aside class="notes">
-    <h4>Problema (30 s)</h4>
-    <p class="say">"Metade da carteira está usando menos o sistema. Vinte e três chamados estão parados há mais de um mês. E isso está em três planilhas que ninguém cruza."</p>
-    <p class="say">"Fizemos o Radar para duas pessoas: o analista de CS, que liga para o cliente, e o gestor, que responde para a diretoria."</p>
-    <h4>Por que esse problema (se perguntarem)</h4>
-    <ul><li>Usa os 3 arquivos, ligados por <code>cliente_id</code>.</li><li>Termina numa ação concreta, não só num gráfico.</li><li>É a dor de quem vende software com suporte humano, como a Data Cempro.</li></ul>
-  </aside>
 </section>
 
 <!-- 3 COMO PRIORIZAMOS -->
-<section class="slide" data-min="0:50" data-end="1:15">
-  <div class="kicker">Como priorizamos o risco <span class="t">0:50 – 1:15</span></div>
+<section class="slide">
+  <div class="kicker">Como priorizamos o risco</div>
   <h2>Um score de 0 a 100 que é a soma de três motivos que o analista entende.</h2>
   <div class="bar">
     <div style="flex:40;background:#4F46E5">Engajamento · até 40</div>
@@ -185,21 +161,11 @@ body.notes #stage{right:430px}
     <div class="card" style="flex:1.3"><p><b>Porte não aumenta o risco</b>: só desempata quem é atendido primeiro. Faixas: <span class="pill alto">alto ≥ 70</span> <span class="pill atencao">atenção ≥ 40</span> <span class="pill saudavel">saudável</span></p></div>
   </div>
   <div class="foot"><span>Regras auditáveis no backend · a IA não calcula o score</span><span>3</span></div>
-  <aside class="notes">
-    <h4>Score (25 s)</h4>
-    <p class="say">"O score não é uma caixa-preta: é a soma de três facetas. O analista vê exatamente de onde vem cada ponto."</p>
-    <ul>
-      <li>Engajamento compara o <b>uso total</b> do cliente: cada mês do arquivo de uso é de um serviço diferente, comparar serviço a serviço seria falso.</li>
-      <li>Pesos 40/35/25: uso é o sinal mais antecipado; atrito é o mais acionável; nota é a mais escassa (pendentes não têm nota).</li>
-      <li>Porte só desempata: um cliente pequeno com o mesmo comportamento tem o mesmo risco.</li>
-    </ul>
-    <p>Se estiver atrasado, pule direto para a demo: o C022 mostra isso na tela.</p>
-  </aside>
 </section>
 
 <!-- 4 PERFIS -->
-<section class="slide" data-min="1:15" data-end="1:30">
-  <div class="kicker">Do risco à ação <span class="t">1:15 – 1:30</span></div>
+<section class="slide">
+  <div class="kicker">Do risco à ação</div>
   <h2>O mesmo score pede conversas diferentes. Por isso agrupamos os clientes em perfis.</h2>
   <div class="grid4 grow" style="align-content:start">
     <div class="card" style="border-top:6px solid var(--alto)"><div class="mid">10</div><h3 style="margin-top:14px">Travado</h3><p>Chamado parado e uso caindo.</p><p style="margin-top:10px"><b>Destravar os pendentes</b> antes de qualquer outra conversa.</p></div>
@@ -209,52 +175,28 @@ body.notes #stage{right:430px}
   </div>
   <p style="margin-top:18px">Perfis por <b>k-means</b> sobre as três facetas, com regras de reserva se o agrupamento falhar.</p>
   <div class="foot"><span>9 dos 10 clientes em alto risco são “travados”</span><span>4</span></div>
-  <aside class="notes">
-    <h4>Perfis (15 s)</h4>
-    <p class="say">"Silencioso pede reengajamento, frustrado pede suporte, travado pede destravar chamado. É isso que tira o Radar de ser só mais um dashboard."</p>
-    <p>Gancho de criatividade: o perfil muda a ação sugerida, não só a cor.</p>
-    <p><b>Agora troque para o navegador.</b></p>
-  </aside>
 </section>
 
 <!-- 5 DEMO -->
-<section class="slide" data-min="1:30" data-end="4:00">
-  <div class="kicker">Demonstração ao vivo <span class="t">1:30 – 4:00</span></div>
+<section class="slide">
+  <div class="kicker">Demonstração ao vivo</div>
   <h2 style="margin-bottom:22px">Um dia de trabalho, do analista ao relatório da diretoria.</h2>
   <div class="steps grow" style="grid-template-rows:auto auto;align-content:start">
-    <div class="step"><span class="role" style="color:var(--ink-faint)">Analista</span><span class="when">1:30 · Painel</span><h3>Quem atender hoje</h3><p>10 em alto risco, 40 pendentes, 13 de prioridade alta. <b>C022</b> no topo da lista.</p><span class="say">“A lista já chega ordenada.”</span></div>
-    <div class="step"><span class="role" style="color:var(--ink-faint)">Analista</span><span class="when">1:50 · Cliente 360</span><h3>Por que o C022</h3><p>Score 98 = 40 + 35 + 23. Perfil Travado. Operações −38%, chamado alto pendente, nota 2,7.</p><span class="say">“As facetas somam o score.”</span></div>
-    <div class="step"><span class="role aic">Analista + IA</span><span class="when">2:15 · Ação sugerida</span><h3>O que dizer</h3><p>“Gerar ação sugerida”: resumo, roteiro de ligação e próximo passo. Depois, “Marcar como contatado”.</p><span class="say">“A IA escreve; quem decide é a regra.”</span></div>
-    <div class="step"><span class="role" style="color:var(--ink-faint)">Analista</span><span class="when">2:45 · Chamados</span><h3>Fila inteligente</h3><p>Ordem inteligente × ordem de chegada: o chamado do C022 sobe para 1º, “cliente em alto risco”.</p><span class="say">“O suporte atende quem pode sair.”</span></div>
-    <div class="step"><span class="role">Gestor</span><span class="when">3:05 · Visão do gestor</span><h3>Carteira e perfis</h3><p>48 em risco. Cada perfil vira uma ação em escala: <b>10 travados → força-tarefa de suporte</b>.</p><span class="say">“O gestor não liga cliente a cliente; decide a ação por grupo.”</span></div>
-    <div class="step"><span class="role">Gestor</span><span class="when">3:20 · Cobertura</span><h3>O time está cobrindo?</h3><p>“1 de 10” alto risco contatado: é o C022 que a analista acabou de marcar. 23 chamados há mais de 30 dias.</p><span class="say">“Quem fez e quando fica registrado.”</span></div>
-    <div class="step"><span class="role">Gestor</span><span class="when">3:35 · Produto</span><h3>Onde o produto dói</h3><p>Top 3 de atrito: Portal Web concentra 34% dos chamados de erro no sistema.</p><span class="say">“Isso vai para o produto, não para o score.”</span></div>
-    <div class="step"><span class="role">Gestor</span><span class="when">3:50 · Relatório</span><h3>Para a diretoria</h3><p>Baixar o PDF (ou Excel). A diretoria recebe o arquivo; não precisa de login.</p><span class="say">“Pronto para a reunião de segunda.”</span></div>
+    <div class="step"><span class="role" style="color:var(--ink-faint)">Analista</span><span class="when">Painel</span><h3>Quem atender hoje</h3><p>10 em alto risco, 40 pendentes, 13 de prioridade alta. <b>C022</b> no topo da lista.</p></div>
+    <div class="step"><span class="role" style="color:var(--ink-faint)">Analista</span><span class="when">Cliente 360</span><h3>Por que o C022</h3><p>Score 98 = 40 + 35 + 23. Perfil Travado. Operações −38%, chamado alto pendente, nota 2,7.</p></div>
+    <div class="step"><span class="role aic">Analista + IA</span><span class="when">Ação sugerida</span><h3>O que dizer</h3><p>“Gerar ação sugerida”: resumo, roteiro de ligação e próximo passo. Depois, “Marcar como contatado”.</p></div>
+    <div class="step"><span class="role" style="color:var(--ink-faint)">Analista</span><span class="when">Chamados</span><h3>Fila inteligente</h3><p>Ordem inteligente × ordem de chegada: o chamado do C022 sobe para 1º, “cliente em alto risco”.</p></div>
+    <div class="step"><span class="role">Gestor</span><span class="when">Visão do gestor</span><h3>Carteira e perfis</h3><p>48 em risco. Cada perfil vira uma ação em escala: <b>10 travados → força-tarefa de suporte</b>.</p></div>
+    <div class="step"><span class="role">Gestor</span><span class="when">Cobertura</span><h3>O time está cobrindo?</h3><p>“1 de 10” alto risco contatado: é o C022 que a analista acabou de marcar. 23 chamados há mais de 30 dias.</p></div>
+    <div class="step"><span class="role">Gestor</span><span class="when">Produto</span><h3>Onde o produto dói</h3><p>Top 3 de atrito: Portal Web concentra 34% dos chamados de erro no sistema.</p></div>
+    <div class="step"><span class="role">Gestor</span><span class="when">Relatório</span><h3>Para a diretoria</h3><p>Baixar o PDF (ou Excel). A diretoria recebe o arquivo; não precisa de login.</p></div>
   </div>
-  <div class="foot"><span>Logins: analista@radar.local · gestor@radar.local · senha radar123</span><span>5</span></div>
-  <aside class="notes">
-    <h4>Roteiro da demo (2 min 30 s)</h4>
-    <ul>
-      <li><b>Login analista</b> → Painel. Aponte os KPIs e a lista “prioridade de contato”.</li>
-      <li>Clique no <b>C022</b>. Mostre as três facetas somando 98 e o gráfico de uso.</li>
-      <li><b>Gerar ação sugerida</b>: o roteiro do C022 já está pré-gerado (instantâneo).</li>
-      <li><b>Marcar como contatado</b>. Não pule: o gestor vai ver isso.</li>
-      <li><b>Chamados</b>: alterne “ordem inteligente” × “ordem de chegada”.</li>
-      <li><b>Sair → login gestor → Gestor</b>: carteira em risco, cobertura (1 de 10), perfis com ação em escala, top 3 de atrito, baixar PDF.</li>
-    </ul>
-    <h4>Se der problema</h4>
-    <ul>
-      <li>IA lenta ou sem internet: o roteiro sai por regras. Fale “sem internet, ele continua”. Vira ponto a favor.</li>
-      <li>Local caiu: usar <b>hackathon.abrxu.com</b> (mesmos logins).</li>
-      <li>Atrasado em 3:30: pule o mapa de produto, vá direto ao PDF.</li>
-      <li>Adiantado: abra o <b>Eco</b> (chat flutuante) e pergunte “quais clientes travados de Canoas?”.</li>
-    </ul>
-  </aside>
+  <div class="foot"><span>Analista de CS → Gestor de CS → Diretoria</span><span>5</span></div>
 </section>
 
 <!-- 6 RESULTADOS -->
-<section class="slide" data-min="4:00" data-end="4:35">
-  <div class="kicker">Resultados <span class="t">4:00 – 4:35</span></div>
+<section class="slide">
+  <div class="kicker">Resultados</div>
   <h2>O que já funciona, com os dados oficiais.</h2>
   <div class="grid4" style="margin-bottom:26px">
     <div class="card"><div class="mid">100</div><div class="lbl">clientes com score explicado por faceta</div></div>
@@ -267,18 +209,13 @@ body.notes #stage{right:430px}
     <div class="card"><h3>Gestor</h3><p>Vê carteira em risco, cobertura do time, ação por perfil e problema de produto; exporta Excel e PDF.</p></div>
     <div class="card"><h3>Sem internet</h3><p>Score, perfis e roteiros por regras continuam. A IA é acelerador, não dependência.</p></div>
   </div>
-  <div class="foot"><span>No ar em hackathon.abrxu.com · deploy automático a cada push</span><span>6</span></div>
-  <aside class="notes">
-    <h4>Resultados (35 s)</h4>
-    <p class="say">"Tudo o que vocês viram roda com as planilhas oficiais, está publicado e tem testes. E se a IA cair, o sistema continua."</p>
-    <p>Métrica que o produto permite medir: % de clientes em alto risco contatados em até 48 h.</p>
-  </aside>
+  <div class="foot"><span>Rodando com as planilhas oficiais do desafio</span><span>6</span></div>
 </section>
 
 <!-- 7 LIMITAÇÕES E PRÓXIMOS -->
-<section class="slide" data-min="4:35" data-end="5:00">
-  <div class="kicker">Limitações e próximo passo <span class="t">4:35 – 5:00</span></div>
-  <h2>Honesto sobre o que é sinal, e claro sobre o que vem depois.</h2>
+<section class="slide">
+  <div class="kicker">Limitações e próximo passo</div>
+  <h2>O que é sinal hoje, e o que vem depois.</h2>
   <div class="grid2 grow" style="align-content:start">
     <div class="card"><h3>Limitações</h3>
       <ul class="clean">
@@ -297,25 +234,10 @@ body.notes #stage{right:430px}
   </div>
   <p style="margin-top:22px;font-size:27px;color:var(--ink)"><b>A Data Cempro vende tecnologia com gente junto. O Radar diz a essa gente com quem falar primeiro.</b></p>
   <div class="foot"><span>Obrigado · perguntas</span><span>7</span></div>
-  <aside class="notes">
-    <h4>Fechamento (25 s)</h4>
-    <p class="say">"É um sinal, não uma bola de cristal: não existe histórico de cancelamento nos dados. O próximo passo é ligar no helpdesk real e medir se o contato reduz o risco."</p>
-    <p class="say">"A Data Cempro vende tecnologia com gente junto. O Radar diz a essa gente com quem falar primeiro hoje. Obrigado."</p>
-    <p>Terminar no tempo vale ponto em Clareza (10 pts).</p>
-  </aside>
-</section>
-
-<!-- 8 DIVISOR ARGUIÇÃO -->
-<section class="slide dark divider" data-min="arguição">
-  <div class="kicker">Material de apoio</div>
-  <h1 style="margin-top:20px">Arguição</h1>
-  <p style="font-size:32px;margin-top:22px;max-width:1100px">Critérios do desafio, por que escolhemos cada caminho, tecnologia e respostas para a banca.</p>
-  <div class="foot"><span>Banca: profissionais da Data Cempro e professores do Cesuca</span><span>8</span></div>
-  <aside class="notes"><p>Daqui em diante, só abra se a banca perguntar. Use as setas para ir direto ao slide do tema.</p></aside>
 </section>
 
 <!-- 9 DESAFIO → ESCOLHAS -->
-<section class="slide" data-min="arguição">
+<section class="slide">
   <div class="kicker">O que o desafio pediu</div>
   <h2>As cinco perguntas do enunciado, respondidas.</h2>
   <table>
@@ -327,50 +249,32 @@ body.notes #stage{right:430px}
     <tr><td><b>Limitações e riscos?</b></td><td>Sinal, não previsão; 3 meses de uso; pesos definidos pelo time; IA com reserva por regras.</td></tr>
   </table>
   <p style="margin-top:22px">O desafio pede soluções que <b>informam, automatizam, preveem, organizam, priorizam ou facilitam decisões</b>. Escolhemos <b>priorizar</b> e <b>facilitar decisões</b> como centro; informar, organizar e automatizar vêm junto; prever fica como próximo passo, com dado real.</p>
-  <div class="foot"><span>Fonte: 02_Desafio_Competidores.pdf</span><span>9</span></div>
-  <aside class="notes"><p>Se perguntarem "por que não previsão de churn?": não há rótulo de cancelamento; 100 clientes e 3 meses não sustentam treino. Prometer previsão seria inventar.</p></aside>
-</section>
-
-<!-- 10 CRITÉRIOS DE AVALIAÇÃO -->
-<section class="slide" data-min="arguição">
-  <div class="kicker">Critérios de avaliação</div>
-  <h2>Como cada critério da banca está atendido.</h2>
-  <table>
-    <tr><th style="width:24%">Critério</th><th style="width:8%">Peso</th><th>Como o Radar responde</th></tr>
-    <tr><td><b>Funcionamento</b> <span class="pill">1º desempate</span></td><td>25</td><td>Roda com os dados oficiais, publicado na web, 19 testes, IA com reserva por regras, campos vazios tratados como ausentes.</td></tr>
-    <tr><td><b>Utilidade prática</b> <span class="pill">2º desempate</span></td><td>25</td><td>“Com quem falar hoje e o que dizer” para o analista; cobertura e relatório para o gestor.</td></tr>
-    <tr><td><b>Criatividade</b></td><td>25</td><td>Risco em facetas que somam o score; perfis que mudam a ação; fila de suporte reordenada pelo risco do cliente.</td></tr>
-    <tr><td><b>Tecnologia e dados</b></td><td>15</td><td>Une os 3 arquivos por <code>cliente_id</code>; regras explicáveis; k-means só para agrupar; IA restrita a explicar e escrever.</td></tr>
-    <tr><td><b>Clareza</b></td><td>10</td><td>Pitch no roteiro sugerido: 1 min problema, 3 min demo, 1 min resultados e limitações.</td></tr>
-  </table>
-  <div class="foot"><span>Fonte: regulamento, item 10 · total 100 pontos</span><span>10</span></div>
-  <aside class="notes"><p>Por isso a ordem das nossas prioridades foi: estabilidade primeiro (funcionamento é 1º desempate), depois utilidade, depois o “uau”.</p></aside>
+  <div class="foot"><span>Hackathon Data Cempro · Cesuca 2026</span><span>8</span></div>
 </section>
 
 <!-- 11 POR QUE ESSAS ESCOLHAS -->
-<section class="slide" data-min="arguição">
+<section class="slide">
   <div class="kicker">Por que essas escolhas</div>
   <h2>O que descartamos, e por quê.</h2>
   <table>
     <tr><th style="width:27%">Escolhemos</th><th style="width:25%">Em vez de</th><th>Porque</th></tr>
     <tr><td><b>Score por regras</b></td><td>Modelo de ML treinado</td><td>Não há rótulo de churn; regra é explicável para quem liga para o cliente.</td></tr>
-    <tr><td><b>Score = soma das facetas</b></td><td>Número único opaco</td><td>O analista vê o porquê de cada ponto; a banca pode auditar.</td></tr>
+    <tr><td><b>Score = soma das facetas</b></td><td>Número único opaco</td><td>O analista vê o porquê de cada ponto; qualquer pessoa pode auditar.</td></tr>
     <tr><td><b>Uso total do cliente</b></td><td>Uso por serviço</td><td>Cada mês do arquivo é de um serviço diferente.</td></tr>
     <tr><td><b>Porte só desempata</b></td><td>Porte aumenta o risco</td><td>Mesmo comportamento, mesmo risco; porte decide quem vem antes.</td></tr>
     <tr><td><b>IA só explica e escreve</b></td><td>IA decide o risco</td><td>Decisão auditável fica nas regras; IA acelera o trabalho.</td></tr>
     <tr><td><b>Agente com funções fixas</b></td><td>Chat que gera SQL</td><td>Mais seguro e não quebra ao vivo.</td></tr>
     <tr><td><b>Dois papéis com login</b></td><td>Acesso único</td><td>Separa operação (analista) de gestão (gestor).</td></tr>
   </table>
-  <div class="foot"><span>Detalhe em docs/pitch.md</span><span>11</span></div>
-  <aside class="notes"><p>Insight de produto (serviço × assunto) é só do gestor e não entra no score de nenhum cliente: é problema do produto, não do cliente.</p></aside>
+  <div class="foot"><span>Decisões do time</span><span>9</span></div>
 </section>
 
 <!-- 12 TECNOLOGIA -->
-<section class="slide" data-min="arguição">
+<section class="slide">
   <div class="kicker">Tecnologia</div>
   <h2>Simples, conhecido e com reserva em cada ponto que pode falhar.</h2>
   <div class="arch">
-    <div class="card box"><span class="pill">Dados</span><h3 style="margin-top:12px">3 planilhas</h3><p>clientes, atendimentos, uso. Carga na subida; data serial do Excel convertida.</p></div>
+    <div class="card box"><span class="pill">Dados</span><h3 style="margin-top:12px">3 planilhas</h3><p>clientes, atendimentos, uso. Unidas pelo código do cliente.</p></div>
     <div class="arrow">→</div>
     <div class="card box"><span class="pill">Backend</span><h3 style="margin-top:12px">FastAPI + PostgreSQL 16</h3><p>Score por regras, k-means (scikit-learn), login JWT por papel, relatórios openpyxl + reportlab.</p></div>
     <div class="arrow">→</div>
@@ -383,81 +287,14 @@ body.notes #stage{right:430px}
     <div class="card"><h3>Qualidade</h3><p>19 testes (pytest): carga, score, rotas, permissões, IA com reserva, relatórios.</p></div>
     <div class="card"><h3>Segurança</h3><p><code>.env</code> fora do git; para a IA vão código do cliente e métricas, nunca o nome.</p></div>
   </div>
-  <div class="foot"><span>Contrato da API em docs/api-contract.md</span><span>12</span></div>
-  <aside class="notes"><p>IA generativa e bibliotecas abertas são permitidas pelo regulamento, com identificação: está no README.</p><p>Os 5 primeiros da lista têm roteiro gerado na subida, por isso a demo é instantânea.</p></aside>
-</section>
-
-<!-- 13 PERGUNTAS DATA CEMPRO -->
-<section class="slide" data-min="arguição">
-  <div class="kicker">Banca · Data Cempro (negócio e produto)</div>
-  <h2 style="margin-bottom:22px">Perguntas prováveis e respostas curtas.</h2>
-  <div class="qa">
-    <div><p class="q">Quem usa e em que rotina?</p><p class="a">O analista abre a lista toda manhã e registra cada contato; o gestor revisa a carteira e manda o relatório semanal à diretoria.</p></div>
-    <div><p class="q">Como sei que funcionou?</p><p class="a">Processo: % de alto risco contatado em 48 h. Resultado, com histórico: queda do score após o contato e renovação.</p></div>
-    <div><p class="q">Isso prevê cancelamento?</p><p class="a">Não. É sinal antecipado. Sem histórico de cancelamento, prever seria inventar. Com histórico, o modelo supervisionado entra.</p></div>
-    <div><p class="q">Integra com nosso helpdesk?</p><p class="a">Hoje lê planilha. Próximo passo: conector por API ou webhook do helpdesk e da telemetria, recálculo diário.</p></div>
-    <div><p class="q">Por que esses pesos?</p><p class="a">Uso é o sinal mais antecipado, atrito o mais acionável, nota o mais escasso. No produto, o gestor ajusta.</p></div>
-    <div><p class="q">Cliente grande não é mais importante?</p><p class="a">É, por isso porte desempata a fila. Mas não muda o risco: o comportamento é o mesmo.</p></div>
-    <div><p class="q">E governança?</p><p class="a">Cada contato registra quem fez e quando. Insight de produto e relatório da diretoria só para o gestor.</p></div>
-    <div><p class="q">Quanto custa a IA?</p><p class="a">Modelo barato, chamada só quando o analista pede; os 5 primeiros vêm pré-gerados. Sem chave, custo zero e tudo funciona.</p></div>
-  </div>
-  <div class="foot"><span>Resposta curta primeiro; detalhe só se pedirem</span><span>13</span></div>
-</section>
-
-<!-- 14 PERGUNTAS CESUCA -->
-<section class="slide" data-min="arguição">
-  <div class="kicker">Banca · Cesuca (engenharia, dados, segurança)</div>
-  <h2 style="margin-bottom:22px">Perguntas prováveis e respostas curtas.</h2>
-  <div class="qa">
-    <div><p class="q">Por que não treinar um modelo?</p><p class="a">Não há rótulo de churn. Existe um pipeline com dados simulados, separado, só para mostrar o próximo passo. Não substitui o score.</p></div>
-    <div><p class="q">O k-means é confiável?</p><p class="a">Agrupa só as três notas de faceta; o nome do perfil vem de regras sobre os centróides. O analista sempre vê as facetas.</p></div>
-    <div><p class="q">E campos vazios?</p><p class="a">Pendente não tem tempo nem nota: fica <code>null</code>, nunca 0. Sem avaliação, satisfação neutra.</p></div>
-    <div><p class="q">A IA pode alucinar no chat?</p><p class="a">O agente só chama funções fixas do backend, nunca gera SQL. Responde com números que o backend calculou.</p></div>
-    <div><p class="q">LGPD?</p><p class="a">Dados fictícios. Mesmo assim, para a IA vão só o código do cliente e métricas; sem chave, nada sai do servidor.</p></div>
-    <div><p class="q">Segredos?</p><p class="a"><code>.env</code> fora do git; chave da IA e segredo do JWT por variável de ambiente e GitHub Secrets.</p></div>
-    <div><p class="q">Testes e observabilidade?</p><p class="a">19 testes pytest. <code>/api/health</code> mostra banco e carga sem derrubar a API.</p></div>
-    <div><p class="q">Se a internet cair agora?</p><p class="a">Timeout curto, sem retentativa, cai para regras. A demo inteira roda local no Docker.</p></div>
-  </div>
-  <div class="foot"><span>Se não souber: “não fizemos isso ainda; faríamos assim…”</span><span>14</span></div>
-</section>
-
-<!-- 15 CHECKLIST -->
-<section class="slide" data-min="antes">
-  <div class="kicker">Antes de subir ao palco</div>
-  <h2>Checklist de 2 minutos.</h2>
-  <div class="grid2 grow" style="align-content:start">
-    <div class="card"><h3>Máquina</h3>
-      <ul class="clean">
-        <li><code>docker compose up</code> rodando; <code>/api/health</code> com <code>dados_carregados: true</code>.</li>
-        <li>Aba 1: este guia. Aba 2: tela de login do Radar.</li>
-        <li>Aba reserva: hackathon.abrxu.com já logada.</li>
-        <li>Zoom do navegador em 125% para o telão.</li>
-        <li>Notificações desligadas; carregador na tomada.</li>
-      </ul></div>
-    <div class="card"><h3>Roteiro</h3>
-      <ul class="clean">
-        <li>C022 ainda <b>não</b> marcado como contatado (reiniciar o backend zera).</li>
-        <li>Quem fala o quê: abertura, demo, fechamento.</li>
-        <li>Cronômetro: tecla <b>T</b> neste guia.</li>
-        <li>Ensaiar uma vez inteira, cronometrado.</li>
-        <li>Frase final decorada.</li>
-      </ul></div>
-  </div>
-  <div class="foot"><span>Teclas: ← → navegar · N notas · T cronômetro · F tela cheia</span><span>15</span></div>
+  <div class="foot"><span>Tudo em Docker, do banco ao navegador</span><span>10</span></div>
 </section>
 
 </div></div>
 
 <button class="navbtn" id="prev" aria-label="Anterior">‹</button>
 <button class="navbtn" id="next" aria-label="Próximo">›</button>
-<div id="notes">
-  <div id="clock">0:00</div>
-  <div id="budget"></div>
-  <div id="notebody"></div>
-</div>
 <div id="hud"><i></i></div>
-<div id="help">← → navegar · N notas · T cronômetro · R zerar · F tela cheia</div>
-
 <script>
 (function(){
   var slides=[].slice.call(document.querySelectorAll('.slide'));
@@ -468,27 +305,14 @@ body.notes #stage{right:430px}
   function show(n){
     i=Math.max(0,Math.min(slides.length-1,n));
     slides.forEach(function(s,k){s.classList.toggle('on',k===i)});
-    var nt=slides[i].querySelector('.notes');
-    document.getElementById('notebody').innerHTML=(nt?nt.innerHTML:'<p>Sem notas.</p>');
-    var a=slides[i].dataset.min, e=slides[i].dataset.end;
-    document.getElementById('budget').textContent='Slide '+(i+1)+'/'+slides.length+(e?' · janela '+a+' – '+e:(a?' · '+a:''));
     document.querySelector('#hud i').style.width=((i+1)/slides.length*100)+'%';
     try{history.replaceState(null,'','#'+(i+1));}catch(e){}
   }
-  slides.forEach(function(s){var n=s.querySelector('.notes'); if(n) n.style.display='none';});
-  var t0=null, acc=0, tick=null;
-  function secs(){return acc+(t0?(Date.now()-t0)/1000:0);}
-  function draw(){var s=Math.floor(secs());var c=document.getElementById('clock');c.textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);c.classList.toggle('late',s>300);}
-  function toggleTimer(){if(t0){acc=secs();t0=null;clearInterval(tick);}else{t0=Date.now();tick=setInterval(draw,250);} draw();}
-  function resetTimer(){acc=0;t0=t0?Date.now():null;draw();}
   document.addEventListener('keydown',function(e){
     var k=e.key;
     if(k==='ArrowRight'||k==='PageDown'||k===' '){e.preventDefault();show(i+1);}
     else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();show(i-1);}
     else if(k==='Home'){show(0);} else if(k==='End'){show(slides.length-1);}
-    else if(k==='n'||k==='N'){document.body.classList.toggle('notes');document.getElementById('notes').style.display=document.body.classList.contains('notes')?'block':'none';setTimeout(fit,0);}
-    else if(k==='t'||k==='T'){if(!document.body.classList.contains('notes')){document.body.classList.add('notes');document.getElementById('notes').style.display='block';setTimeout(fit,0);} toggleTimer();}
-    else if(k==='r'||k==='R'){resetTimer();}
     else if(k==='f'||k==='F'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}catch(err){}}
   });
   document.getElementById('prev').onclick=function(){show(i-1)};
@@ -497,8 +321,7 @@ body.notes #stage{right:430px}
   document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
   document.addEventListener('touchend',function(e){if(tx===null)return;var d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)show(i+(d<0?1:-1));tx=null},{passive:true});
   window.addEventListener('resize',fit);
-  setTimeout(function(){var h=document.getElementById('help');if(h)h.style.opacity='0'},6000);
-  fit(); show(i); draw();
+  fit(); show(i);
 })();
 </script>
 </body>

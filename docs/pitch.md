@@ -2,7 +2,7 @@
 
 Material de apoio para montar a apresentação de 5 minutos. Vocabulário em [GLOSSARY.md](../GLOSSARY.md).
 
-Versão para o telão, com notas do apresentador e cronômetro: [pitch-guia.html](pitch-guia.html) (abrir no navegador; ← → navega, N notas, T cronômetro, F tela cheia).
+Slides para o telão: [pitch-guia.html](pitch-guia.html) (abrir no navegador; ← → navega, F tela cheia). Os slides só têm o que pode ser mostrado ao público; falas, plano B e checklist ficam abaixo, em "Apoio do apresentador".
 
 ## Descrição em 5 frases (entregável obrigatório)
 
@@ -130,3 +130,20 @@ Nota estimada: **76/100**. Sobe para cerca de 85 com a tela do gestor no fronten
 | Apresentação | 7/10 | Roteiro prometer o que não está na tela |
 
 **Pendências do frontend** (time de front): ~~tela do gestor~~ (feita: `/gestor` usa `/gestor/visao` e baixa os relatórios); selo visível quando estiver usando `mock.js` e login sem fallback para mock; opcional, caixa "Pergunte ao Radar" chamando `/agente/perguntar`.
+
+## Apoio do apresentador (não vai para o telão)
+
+Slides 1 a 7 são o pitch de 5 min; 8 a 10 (desafio, escolhas, tecnologia) ficam de reserva para a arguição.
+
+**Plano B na demo**
+- IA lenta ou sem internet: o roteiro sai por regras; falar "sem internet, ele continua".
+- Ambiente local caiu: usar a URL de produção (ver README), mesmos logins.
+- Atrasado aos 3:30: pular o top 3 de atrito e ir direto ao PDF.
+- Adiantado: abrir o Eco e perguntar "quais clientes travados de Canoas?".
+
+**Checklist antes de subir**
+- `docker compose up` rodando e `/api/health` com `dados_carregados: true`.
+- Aba 1: slides. Aba 2: login do Radar. Aba reserva: produção já logada.
+- C022 ainda não marcado como contatado (reiniciar o backend zera).
+- Zoom do navegador em 125%, notificações desligadas, carregador na tomada.
+- Ensaiar uma vez inteira com cronômetro.
