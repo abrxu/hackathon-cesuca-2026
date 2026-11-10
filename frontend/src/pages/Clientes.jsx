@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
 import {
-  BotoesRelatorio, Button, Chip, EmptyState, ErrorState, PageHeader, PerfilPill, RiskPill, ScoreBar, Select, SkeletonRows, Sparkline, useData,
+  BotoesRelatorio, Button, EmptyState, ErrorState, FilterBar, PageHeader, PerfilPill, RiskPill, ScoreBar, SearchInput, Select,
+  SkeletonRows, Sparkline, Th, filtrarPorBusca, rotuloOrdenacao, useData, useOrdenacao,
 } from "../components/ui.jsx";
 
 const OPCOES = {
@@ -17,24 +18,46 @@ const OPCOES = {
 };
 const ROTULOS = { faixa: "Risco", perfil: "Perfil", porte: "Porte", setor: "Setor", cidade: "Cidade", servico: "Serviço" };
 const CAMPOS = Object.keys(ROTULOS);
+const FAIXA_PESO = { alto: 3, atencao: 2, saudavel: 1 };
 
 const valorLegivel = (campo, v) => (campo === "faixa" ? FAIXA_LABEL[v] : campo === "perfil" ? PERFIL_LABEL[v] : v);
+
+// Variação de acessos do primeiro ao último mês (jul → set), para ordenar a coluna de uso.
+function variacaoUso(c) {
+  const v = (c.uso_total ?? []).map((u) => u.acessos).filter(Number.isFinite);
+  if (v.length < 2 || !v[0]) return null;
+  return (v[v.length - 1] - v[0]) / v[0];
+}
+
+const COLUNAS = {
+  nome: { get: (c) => c.nome },
+  setor: { get: (c) => c.setor },
+  cidade: { get: (c) => c.cidade },
+  score: { get: (c) => c.score, primeiro: "desc" },
+  faixa: { get: (c) => FAIXA_PESO[c.faixa], primeiro: "desc" },
+  perfil: { get: (c) => PERFIL_LABEL[c.perfil] },
+  uso: { get: variacaoUso },
+  pendentes: { get: (c) => c.pendentes, primeiro: "desc" },
+  nota: { get: (c) => c.satisfacao_media },
+};
+const NOMES_COLUNAS = { nome: "Cliente", setor: "Setor", cidade: "Cidade", score: "Score", faixa: "Faixa", perfil: "Perfil", uso: "Variação de uso", pendentes: "Pendentes", nota: "Nota" };
+
+const CAMPOS_BUSCA = [
+  (c) => c.nome, (c) => c.cliente_id, (c) => c.setor, (c) => c.cidade, (c) => c.porte,
+  (c) => FAIXA_LABEL[c.faixa], (c) => PERFIL_LABEL[c.perfil], (c) => c.motivo_principal,
+];
 
 export default function Clientes() {
   const { usuario } = useAuth();
   const [params, setParams] = useSearchParams();
-  const filtros = Object.fromEntries([...params.entries()].filter(([, v]) => v));
-  const chave = params.toString();
-  const [busca, setBusca] = useState(filtros.busca ?? "");
-
-  // Busca aplica após uma pausa curta na digitação.
-  useEffect(() => {
-    const t = setTimeout(() => atualizar("busca", busca.trim() || undefined), 250);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busca]);
-
+  const busca = params.get("busca") ?? "";
+  // Filtros de combobox vão para o backend; busca e ordenação são locais.
+  const filtros = Object.fromEntries(CAMPOS.filter((c) => params.get(c)).map((c) => [c, params.get(c)]));
+  const chave = JSON.stringify(filtros);
   const { data, error, loading, reload } = useData(() => api.clientes(filtros), [chave]);
+
+  const encontrados = useMemo(() => filtrarPorBusca(data?.itens, busca, CAMPOS_BUSCA), [data, busca]);
+  const ord = useOrdenacao(encontrados, COLUNAS);
 
   function atualizar(campo, valor) {
     setParams((p) => {
@@ -44,23 +67,18 @@ export default function Clientes() {
     }, { replace: true });
   }
 
-  function ordenarPor(campo) {
-    const atual = filtros.ordenar ?? "prioridade";
-    const dir = atual === campo && (filtros.direcao ?? "desc") === "desc" ? "asc" : "desc";
-    setParams((p) => {
-      const n = new URLSearchParams(p);
-      n.set("ordenar", campo);
-      n.set("direcao", dir);
-      return n;
-    }, { replace: true });
-  }
-
   function limpar() {
-    setBusca("");
+    ord.limpar();
     setParams({}, { replace: true });
   }
 
-  const ativos = CAMPOS.filter((c) => filtros[c]);
+  const ativos = CAMPOS.filter((c) => filtros[c]).map((c) => ({
+    chave: c,
+    rotulo: `${ROTULOS[c]}: ${valorLegivel(c, filtros[c])}`,
+    remover: () => atualizar(c, undefined),
+  }));
+  const filtrando = ativos.length > 0 || busca.trim();
+  const ordenacao = ord.ordem && { rotulo: rotuloOrdenacao(ord.ordem, NOMES_COLUNAS), limpar: ord.limpar };
 
   return (
     <>
@@ -68,62 +86,54 @@ export default function Clientes() {
         {usuario?.papel === "analista" && <BotoesRelatorio papel="analista" filtros={filtros} rotuloPdf="Baixar PDF" />}
       </PageHeader>
 
-      <div className="mb-3 flex flex-wrap items-end gap-3">
-        <label className="flex min-w-64 flex-1 flex-col gap-1 text-sm font-semibold text-ink">
-          Buscar
-          <input
-            type="search"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Nome do cliente ou código (C037)"
-            className="h-10 rounded-control border border-ink bg-surface px-3 text-sm font-normal text-ink"
-          />
-        </label>
+      <FilterBar
+        ativos={ativos}
+        ordenacao={ordenacao}
+        resumo={data && filtrando ? `${encontrados.length} de ${data.total} clientes` : null}
+        onLimpar={limpar}
+      >
+        <SearchInput
+          value={busca}
+          onChange={(v) => atualizar("busca", v || undefined)}
+          placeholder="Nome, código, setor, cidade, perfil, motivo…"
+          className="basis-full lg:basis-72"
+        />
         {CAMPOS.map((c) => (
           <Select key={c} label={ROTULOS[c]} value={filtros[c]} onChange={(v) => atualizar(c, v)} options={OPCOES[c]} />
         ))}
-      </div>
-
-      <div className="mb-4 flex min-h-7 flex-wrap items-center gap-2 text-sm">
-        {ativos.map((c) => (
-          <Chip key={c} onRemove={() => atualizar(c, undefined)}>
-            {ROTULOS[c]}: {valorLegivel(c, filtros[c])}
-          </Chip>
-        ))}
-        {ativos.length > 0 && data && <span className="text-ink-soft">{data.total} resultados</span>}
-      </div>
+      </FilterBar>
 
       <div className="overflow-x-auto rounded-panel border border-ink bg-surface">
         {error ? (
           <ErrorState error={error} onRetry={reload} />
         ) : loading && !data ? (
           <div className="px-5"><SkeletonRows rows={8} cols={7} /></div>
-        ) : data.itens.length === 0 ? (
+        ) : ord.ordenados.length === 0 ? (
           <EmptyState
-            title="Nenhum cliente com esses filtros"
-            hint="Tente remover algum filtro."
+            title={busca.trim() ? `Nenhum cliente encontrado para "${busca.trim()}"` : "Nenhum cliente com esses filtros"}
+            hint="Tente outra busca ou remova algum filtro."
             action={<Button onClick={limpar}>Limpar filtros</Button>}
           />
         ) : (
           <table className={`w-full min-w-[960px] text-sm ${loading ? "opacity-60" : ""}`}>
             <thead className="border-b border-ink bg-canvas text-left text-sm text-ink-soft">
               <tr>
-                <Th onClick={() => ordenarPor("nome")} ativo={filtros.ordenar === "nome"} dir={filtros.direcao}>Cliente</Th>
-                <th className="px-3 py-3 font-semibold">Setor</th>
-                <th className="px-3 py-3 font-semibold">Cidade</th>
-                <Th onClick={() => ordenarPor("score")} ativo={!filtros.ordenar || filtros.ordenar === "score" || filtros.ordenar === "prioridade"} dir={filtros.direcao}>Score</Th>
-                <th className="px-3 py-3 font-semibold">Faixa</th>
-                <th className="px-3 py-3 font-semibold">Perfil</th>
-                <th className="px-3 py-3 font-semibold">Uso jul–set</th>
-                <th className="px-3 py-3 text-right font-semibold">Pendentes</th>
-                <th className="px-3 py-3 text-right font-semibold">Nota</th>
+                <Th {...ord.th("nome")} className="py-3 pl-5 pr-3">Cliente</Th>
+                <Th {...ord.th("setor")} className="px-3 py-3">Setor</Th>
+                <Th {...ord.th("cidade")} className="px-3 py-3">Cidade</Th>
+                <Th {...ord.th("score")} className="px-3 py-3">Score</Th>
+                <Th {...ord.th("faixa")} className="px-3 py-3">Faixa</Th>
+                <Th {...ord.th("perfil")} className="px-3 py-3">Perfil</Th>
+                <Th {...ord.th("uso")} className="px-3 py-3">Uso jul–set</Th>
+                <Th {...ord.th("pendentes")} alinhar="right" className="px-3 py-3">Pendentes</Th>
+                <Th {...ord.th("nota")} alinhar="right" className="px-3 py-3">Nota</Th>
                 <th className="px-5 py-3"><span className="sr-only">Abrir</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {data.itens.map((c) => (
+              {ord.ordenados.map((c) => (
                 <tr key={c.cliente_id} className="hover:bg-brand-soft">
-                  <td className="px-5 py-2.5">
+                  <td className="py-2.5 pl-5 pr-3">
                     <Link to={`/clientes/${c.cliente_id}`} className="font-semibold hover:underline">{c.nome}</Link>
                     <span className="block text-xs text-ink-soft">
                       {c.cliente_id}
@@ -148,16 +158,5 @@ export default function Clientes() {
         )}
       </div>
     </>
-  );
-}
-
-function Th({ children, onClick, ativo, dir }) {
-  return (
-    <th className="px-3 py-3 font-semibold first:px-5" aria-sort={ativo ? (dir === "asc" ? "ascending" : "descending") : "none"}>
-      <button type="button" onClick={onClick} className={`inline-flex items-center gap-1 hover:text-ink ${ativo ? "text-ink" : ""}`}>
-        {children}
-        {ativo && <span aria-hidden>{dir === "asc" ? "↑" : "↓"}</span>}
-      </button>
-    </th>
   );
 }

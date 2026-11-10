@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client.js";
 import { fmt } from "../api/format.js";
-import { Button, ErrorState, PerfilPill, RiskPill, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
+import {
+  Button, ErrorState, FilterBar, PerfilPill, RiskPill, SearchInput, Section, Select, Skeleton, SkeletonRows, Th, faixaClasses,
+  filtrarPorBusca, rotuloOrdenacao, useData, useOrdenacao,
+} from "../components/ui.jsx";
 import AcaoSugerida from "../components/AcaoSugerida.jsx";
 
 const FACETAS = [
@@ -191,8 +194,28 @@ function UsoMensal({ uso, faixa, loading }) {
   );
 }
 
+const COLUNAS_HISTORICO = {
+  data: { get: (a) => a.data_abertura, primeiro: "desc" },
+  chamado: { get: (a) => a.atendimento_id },
+  assunto: { get: (a) => a.assunto },
+  servico: { get: (a) => a.servico },
+  canal: { get: (a) => a.canal },
+  prioridade: { get: (a) => ({ Alta: 3, Normal: 2, Baixa: 1 })[a.prioridade], primeiro: "desc" },
+  status: { get: (a) => a.status },
+  tempo: { get: (a) => a.tempo_resolucao_min, primeiro: "desc" },
+  nota: { get: (a) => a.satisfacao },
+};
+const NOMES_HISTORICO = { data: "Data", chamado: "Chamado", assunto: "Assunto", servico: "Serviço", canal: "Canal", prioridade: "Prioridade", status: "Status", tempo: "Tempo", nota: "Nota" };
+const BUSCA_HISTORICO = [(a) => a.atendimento_id, (a) => a.assunto, (a) => a.servico, (a) => a.canal, (a) => a.prioridade, (a) => a.status];
+
 function Historico({ atendimentos, loading }) {
-  const itens = atendimentos ?? [];
+  const itens = useMemo(() => atendimentos ?? [], [atendimentos]);
+  const [busca, setBusca] = useState("");
+  const [status, setStatus] = useState();
+  const encontrados = useMemo(() => filtrarPorBusca(itens.filter((a) => !status || a.status === status), busca, BUSCA_HISTORICO), [itens, busca, status]);
+  const ord = useOrdenacao(encontrados, COLUNAS_HISTORICO);
+  const statusOpcoes = [...new Set(itens.map((a) => a.status).filter(Boolean))];
+  const limpar = () => { setBusca(""); setStatus(undefined); ord.limpar(); };
   return (
     <Section title="Histórico de chamados" className="lg:col-span-2">
       {loading ? (
@@ -200,35 +223,51 @@ function Historico({ atendimentos, loading }) {
       ) : itens.length === 0 ? (
         <p className="py-6 text-sm text-ink-soft">Este cliente não abriu chamados no período.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="border-b border-ink text-left text-sm text-ink-soft">
-              <tr>
-                {["Data", "Chamado", "Assunto", "Serviço", "Canal", "Prioridade", "Status", "Tempo", "Nota"].map((h) => (
-                  <th key={h} className={`pb-2 pr-4 font-semibold ${["Tempo", "Nota"].includes(h) ? "text-right" : ""}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {itens.map((a) => {
-                const pendente = a.status === "Pendente";
-                return (
-                  <tr key={a.atendimento_id} className={pendente ? "bg-risk-atencao-soft/60" : ""}>
-                    <td className="py-2.5 pr-4">{fmt.data(a.data_abertura)}</td>
-                    <td className="py-2.5 pr-4 text-ink-soft">{a.atendimento_id}</td>
-                    <td className="py-2.5 pr-4 font-medium">{a.assunto}</td>
-                    <td className="py-2.5 pr-4 text-ink-soft">{a.servico}</td>
-                    <td className="py-2.5 pr-4 text-ink-soft">{a.canal}</td>
-                    <td className={`py-2.5 pr-4 ${a.prioridade === "Alta" ? "font-semibold" : ""}`}>{a.prioridade}</td>
-                    <td className={`py-2.5 pr-4 ${pendente ? "font-bold text-ink" : "text-ink-soft"}`}>{pendente && <span className="text-risk-atencao" aria-hidden>◆ </span>}{a.status}</td>
-                    <td className="py-2.5 pr-4 text-right">{fmt.minutos(a.tempo_resolucao_min)}</td>
-                    <td className="py-2.5 text-right">{fmt.num(a.satisfacao)}</td>
+        <>
+          <FilterBar
+            compacta
+            ativos={status ? [{ chave: "status", rotulo: `Status: ${status}`, remover: () => setStatus(undefined) }] : []}
+            ordenacao={ord.ordem && { rotulo: rotuloOrdenacao(ord.ordem, NOMES_HISTORICO), limpar: ord.limpar }}
+            resumo={status || busca.trim() ? `${encontrados.length} de ${itens.length} chamados` : null}
+            onLimpar={limpar}
+          >
+            <SearchInput value={busca} onChange={setBusca} placeholder="Chamado, assunto, serviço, canal…" className="basis-full md:basis-72" />
+            <Select label="Status" value={status} onChange={setStatus} options={statusOpcoes} />
+          </FilterBar>
+          {ord.ordenados.length === 0 ? (
+            <p className="py-6 text-sm text-ink-soft">Nenhum chamado com esses filtros.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-sm">
+                <thead className="border-b border-ink text-left text-sm text-ink-soft">
+                  <tr>
+                    {Object.keys(COLUNAS_HISTORICO).map((id) => (
+                      <Th key={id} {...ord.th(id)} alinhar={["tempo", "nota"].includes(id) ? "right" : "left"} className="pb-2 pr-4">{NOMES_HISTORICO[id]}</Th>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {ord.ordenados.map((a) => {
+                    const pendente = a.status === "Pendente";
+                    return (
+                      <tr key={a.atendimento_id} className={pendente ? "bg-risk-atencao-soft/60" : ""}>
+                        <td className="py-2.5 pr-4">{fmt.data(a.data_abertura)}</td>
+                        <td className="py-2.5 pr-4 text-ink-soft">{a.atendimento_id}</td>
+                        <td className="py-2.5 pr-4 font-medium">{a.assunto}</td>
+                        <td className="py-2.5 pr-4 text-ink-soft">{a.servico}</td>
+                        <td className="py-2.5 pr-4 text-ink-soft">{a.canal}</td>
+                        <td className={`py-2.5 pr-4 ${a.prioridade === "Alta" ? "font-semibold" : ""}`}>{a.prioridade}</td>
+                        <td className={`py-2.5 pr-4 ${pendente ? "font-bold text-ink" : "text-ink-soft"}`}>{pendente && <span className="text-risk-atencao" aria-hidden>◆ </span>}{a.status}</td>
+                        <td className="py-2.5 pr-4 text-right">{fmt.minutos(a.tempo_resolucao_min)}</td>
+                        <td className="py-2.5 pr-4 text-right">{fmt.num(a.satisfacao)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </Section>
   );
