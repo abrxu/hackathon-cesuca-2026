@@ -133,7 +133,7 @@ Nota estimada: **76/100**. Sobe para cerca de 85 com a tela do gestor no fronten
 
 ## Apoio do apresentador (não vai para o telão)
 
-Slides 1 a 7 são o pitch de 5 min; 8 a 11 (desafio, regras do desafio, escolhas, tecnologia) ficam de reserva para a arguição.
+Slides 1 a 9 são o pitch de 5 min (6 e 7 são prints das telas, para mostrar se a demo ao vivo falhar ou para recapitular); 10 a 13 (desafio, regras do desafio, escolhas, tecnologia) ficam de reserva para a arguição.
 
 **Plano B na demo**
 - IA lenta ou sem internet: o roteiro sai por regras; falar "sem internet, ele continua".
