@@ -286,3 +286,155 @@ class Store:
             except Exception as e:  # nunca derruba a rota
                 log.warning("falha ao gravar contato no banco: %s", e)
         return agora
+
+    # ---------- visão do gestor ----------
+    def visao_gestor(self) -> dict:
+        """Carteira consolidada: tendência, concentração de risco, execução do time e produto."""
+        riscos, clientes = self.riscos, self.ds.clientes
+        pares = [(clientes[cid], r) for cid, r in riscos.items() if cid in clientes]
+        total = len(pares)
+        alto = [(c, r) for c, r in pares if r.faixa == "alto"]
+        em_risco = [(c, r) for c, r in pares if r.faixa in ("alto", "atencao")]
+
+        # evolução mensal da carteira (uso total + atendimentos abertos no mês)
+        meses: dict[str, dict] = {}
+
+        def _mes(mes):
+            return meses.setdefault(mes, {"mes": mes, "operacoes": 0, "acessos": 0, "operacoes_em_risco": 0,
+                                          "operacoes_saudaveis": 0, "atendimentos": 0, "_notas": []})
+
+        for u in self.ds.uso:
+            m = _mes(u.mes)
+            m["operacoes"] += u.operacoes or 0
+            m["acessos"] += u.acessos or 0
+            r = riscos.get(u.cliente_id)
+            if r is not None:
+                m["operacoes_em_risco" if r.faixa in ("alto", "atencao") else "operacoes_saudaveis"] += u.operacoes or 0
+        for a in self.ds.atendimentos:
+            if not a.data_abertura:
+                continue
+            m = _mes(a.data_abertura.strftime("%Y-%m"))
+            m["atendimentos"] += 1
+            if a.satisfacao is not None:
+                m["_notas"].append(a.satisfacao)
+        evolucao = []
+        for mes in sorted(meses):
+            m = meses[mes]
+            notas = m.pop("_notas")
+            m["satisfacao_media"] = round(sum(notas) / len(notas), 1) if notas else None
+            evolucao.append(m)
+
+        def variacao(campo):
+            vals = [m[campo] for m in evolucao if m.get(campo) is not None]
+            if len(vals) < 2 or not vals[0]:
+                return None
+            return round((vals[-1] - vals[0]) / vals[0] * 100)
+
+        # concentração de risco por segmento
+        def por(attr):
+            grupos: dict[str, dict] = {}
+            for c, r in pares:
+                v = getattr(c, attr) or "—"
+                g = grupos.setdefault(v, {"valor": v, "total": 0, "alto": 0, "atencao": 0, "saudavel": 0})
+                g["total"] += 1
+                g[r.faixa] = g.get(r.faixa, 0) + 1
+            out = list(grupos.values())
+            for g in out:
+                g["em_risco_pct"] = round((g["alto"] + g["atencao"]) / g["total"] * 100) if g["total"] else 0
+            out.sort(key=lambda g: (-g["em_risco_pct"], -g["alto"], g["valor"]))
+            return out
+
+        # perfis de risco
+        perfis: dict[str, dict] = {}
+        for c, r in pares:
+            p = perfis.setdefault(r.perfil, {"perfil": r.perfil, "clientes": 0, "alto": 0, "_scores": []})
+            p["clientes"] += 1
+            p["alto"] += 1 if r.faixa == "alto" else 0
+            p["_scores"].append(r.score)
+        lista_perfis = []
+        for p in perfis.values():
+            s = p.pop("_scores")
+            p["score_medio"] = round(sum(s) / len(s)) if s else None
+            lista_perfis.append(p)
+        lista_perfis.sort(key=lambda p: -(p["score_medio"] or 0))
+
+        # execução do time: cobertura do alto risco e contatos por pessoa
+        contatados_alto = sum(1 for c, _ in alto if c.cliente_id in self.contatos)
+        por_pessoa: dict[str, int] = {}
+        for cid in self.contatos:
+            nome = self.contatos_por.get(cid) or "Sem identificação"
+            por_pessoa[nome] = por_pessoa.get(nome, 0) + 1
+        sem_contato = sorted(
+            ((c, r) for c, r in alto if c.cliente_id not in self.contatos),
+            key=lambda p: scoring.prioridade_key(p[1], p[0]),
+        )
+
+        # backlog de chamados pendentes por idade
+        faixas_idade = [("0–7 dias", 0, 7), ("8–14 dias", 8, 14), ("15–30 dias", 15, 30), ("Mais de 30 dias", 31, 10**6)]
+        backlog = [{"faixa": f, "total": 0, "criticos": 0} for f, _, _ in faixas_idade]
+        mais_antigo = 0
+        pendentes = [a for a in self.ds.atendimentos if a.status == "Pendente"]
+        for a in pendentes:
+            dias = max(0, (self.ref - a.data_abertura).days) if a.data_abertura else 0
+            mais_antigo = max(mais_antigo, dias)
+            r = riscos.get(a.cliente_id)
+            critico = r is not None and scoring.prioridade_sugerida(a, r, self.ref)[0] == "Crítica"
+            for b, (_, lo, hi) in zip(backlog, faixas_idade):
+                if lo <= dias <= hi:
+                    b["total"] += 1
+                    b["criticos"] += 1 if critico else 0
+                    break
+
+        # produto: matriz serviço × assunto (só gestor; não entra no score)
+        celulas: dict[tuple[str, str], list] = {}
+        for a in self.ds.atendimentos:
+            celulas.setdefault((a.servico or "—", a.assunto or "—"), []).append(a)
+        servicos = sorted({k[0] for k in celulas})
+        assuntos = sorted({k[1] for k in celulas})
+        matriz = []
+        for (s, ass), ats in sorted(celulas.items()):
+            notas = [a.satisfacao for a in ats if a.satisfacao is not None]
+            matriz.append({
+                "servico": s, "assunto": ass, "atendimentos": len(ats),
+                "pendentes": sum(1 for a in ats if a.status == "Pendente"),
+                "satisfacao_media": round(sum(notas) / len(notas), 1) if notas else None,
+            })
+
+        sats = [a.satisfacao for a in self.ds.atendimentos if a.satisfacao is not None]
+        return {
+            "kpis": {
+                "total_clientes": total,
+                "clientes_em_risco": len(em_risco),
+                "clientes_alto_risco": len(alto),
+                "uso_variacao_pct": variacao("operacoes"),
+                "uso_em_risco_variacao_pct": variacao("operacoes_em_risco"),
+                "clientes_uso_em_queda": sum(
+                    1 for _, r in pares
+                    if len(r.uso_total) >= 2 and r.uso_total[0]["operacoes"]
+                    and (r.uso_total[0]["operacoes"] - r.uso_total[-1]["operacoes"]) / r.uso_total[0]["operacoes"] >= 0.2
+                ),
+                "satisfacao_media": round(sum(sats) / len(sats), 1) if sats else None,
+                "satisfacao_variacao": (
+                    round(evolucao[-1]["satisfacao_media"] - evolucao[0]["satisfacao_media"], 1)
+                    if len(evolucao) >= 2 and evolucao[0]["satisfacao_media"] is not None
+                    and evolucao[-1]["satisfacao_media"] is not None else None
+                ),
+                "alto_risco_contatados": contatados_alto,
+            },
+            "evolucao": evolucao,
+            "segmentos": {"porte": por("porte"), "setor": por("setor"), "cidade": por("cidade")},
+            "perfis": lista_perfis,
+            "cobertura": {
+                "alto_risco": len(alto),
+                "contatados": contatados_alto,
+                "por_pessoa": sorted(({"nome": n, "contatos": k} for n, k in por_pessoa.items()), key=lambda x: -x["contatos"]),
+                "sem_contato": [
+                    {"cliente_id": c.cliente_id, "nome": c.nome, "porte": c.porte, "score": r.score,
+                     "motivo_principal": r.motivo_principal}
+                    for c, r in sem_contato[:5]
+                ],
+            },
+            "backlog": {"pendentes": len(pendentes), "mais_antigo_dias": mais_antigo, "faixas": backlog},
+            "produto": {"servicos": servicos, "assuntos": assuntos, "celulas": matriz,
+                        "destaques": scoring.insights_produto(self.ds)[:3]},
+        }

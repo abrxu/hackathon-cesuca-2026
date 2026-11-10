@@ -72,6 +72,7 @@ $env:BUILDX_BAKE_ENTITLEMENTS_FS = "0"; docker compose up --build
 | `/clientes` | Clientes em risco: busca, filtros e ordenação (filtros ficam na URL) |
 | `/clientes/:id` | Cliente 360: score, explicação por faceta, uso mensal, histórico; abre o painel de ação sugerida |
 | `/chamados` | Fila de chamados: ordem inteligente x ordem de chegada |
+| `/gestor` | Visão do gestor (só papel gestor): carteira em risco, uso em risco × saudável, perfis com ação em escala, concentração por porte/setor/cidade, cobertura do alto risco e idade dos chamados, mapa serviço × assunto, relatórios para a diretoria |
 
 A camada `frontend/src/api/client.js` segue `docs/api-contract.md`. Enquanto uma rota ainda não existe no backend (404/405/501) ou o backend está fora do ar, ela responde com dados de exemplo de `frontend/src/api/mock.js`, no mesmo formato do contrato. No login de exemplo (só sem backend), e-mails com "gestor" entram como gestor; qualquer outro, como analista.
 

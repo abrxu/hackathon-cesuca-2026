@@ -41,6 +41,7 @@ Códigos: `nao_autenticado` (401), `nao_autorizado` (403), `nao_encontrado` (404
 | Painel, clientes, cliente 360, ação sugerida, fila | ✔ | ✔ |
 | Marcar contato | ✔ | ✔ |
 | Insights de produto | — | ✔ |
+| Visão do gestor (`/gestor/visao`) | — | ✔ |
 | Relatório do analista (para o gestor) | ✔ | — |
 | Relatório do gestor (para a diretoria) | — | ✔ |
 | Agente de análise | ✔ | ✔ (com ferramentas de carteira inteira) |
@@ -205,6 +206,45 @@ Query: `ordem` (`inteligente` padrão | `chegada`), `servico`, `assunto`, `canal
   ]
 }
 ```
+
+### `GET /gestor/visao` (gestor)
+Carteira consolidada para a tela do gestor: tendência, concentração de risco, execução do time e produto. Contatos vêm da sessão do backend (mesma origem de `contatado_em`).
+```json
+{
+  "kpis": {
+    "total_clientes": 100, "clientes_em_risco": 48, "clientes_alto_risco": 10,
+    "uso_variacao_pct": -1, "uso_em_risco_variacao_pct": -25, "clientes_uso_em_queda": 51,
+    "satisfacao_media": 3.8, "satisfacao_variacao": -0.1, "alto_risco_contatados": 1
+  },
+  "evolucao": [
+    { "mes": "2026-07", "operacoes": 1824, "acessos": 3629, "operacoes_em_risco": 1035, "operacoes_saudaveis": 789, "atendimentos": 106, "satisfacao_media": 4.0 }
+  ],
+  "segmentos": {
+    "porte":  [{ "valor": "Pequena", "total": 29, "alto": 3, "atencao": 12, "saudavel": 14, "em_risco_pct": 52 }],
+    "setor":  [ /* mesmo formato */ ],
+    "cidade": [ /* mesmo formato */ ]
+  },
+  "perfis": [{ "perfil": "travado", "clientes": 10, "alto": 9, "score_medio": 78 }],
+  "cobertura": {
+    "alto_risco": 10, "contatados": 1,
+    "por_pessoa": [{ "nome": "Ana Analista", "contatos": 1 }],
+    "sem_contato": [{ "cliente_id": "C097", "nome": "Empresa Exemplo 097", "porte": "Pequena", "score": 88, "motivo_principal": "..." }]
+  },
+  "backlog": {
+    "pendentes": 40, "mais_antigo_dias": 88,
+    "faixas": [{ "faixa": "0–7 dias", "total": 7, "criticos": 4 }, { "faixa": "8–14 dias", "total": 3, "criticos": 3 },
+               { "faixa": "15–30 dias", "total": 7, "criticos": 1 }, { "faixa": "Mais de 30 dias", "total": 23, "criticos": 10 }]
+  },
+  "produto": {
+    "servicos": ["Aplicativo Mobile", "..."], "assuntos": ["Acesso e senha", "..."],
+    "celulas": [{ "servico": "Portal Web", "assunto": "Lentidão", "atendimentos": 12, "pendentes": 2, "satisfacao_media": 3.1 }],
+    "destaques": [ /* 3 primeiros itens de /insights/produto */ ]
+  }
+}
+```
+- `segmentos.*` vem ordenado por `em_risco_pct` (alto + atenção) desc. `perfis` por `score_medio` desc.
+- `criticos` = pendentes com `prioridade_sugerida` "Crítica" (mesma regra da fila). Variações em % comparam o primeiro e o último mês; `null` se não houver base.
+- Indicadores por segmento e por produto não alteram o score de nenhum cliente.
 
 ### `GET /relatorios/analista.{xlsx|pdf}` (analista → gestor)
 Carteira do analista com os filtros da query de `/clientes`: score, facetas, perfil, ação sugerida, contatos feitos no período. Retorna o arquivo (`Content-Disposition: attachment`).

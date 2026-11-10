@@ -1,4 +1,4 @@
-from app.routes import agente, atendimentos, auth, clientes, insights, modelo, painel, relatorios
+from app.routes import agente, atendimentos, auth, clientes, gestor, insights, modelo, painel, relatorios
 
 ROUTERS = [
     auth.router,
@@ -6,6 +6,7 @@ ROUTERS = [
     clientes.router,
     atendimentos.router,
     insights.router,
+    gestor.router,
     relatorios.router,
     agente.router,
     modelo.router,

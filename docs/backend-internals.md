@@ -113,6 +113,7 @@ class Store:
     def cliente_detalhe(self, cid) -> dict       # resposta de GET /clientes/{id}
     def listar(self, **filtros) -> list[dict]
     def painel(self) -> dict
+    def visao_gestor(self) -> dict               # resposta de GET /gestor/visao
     def fila(self, ordem, **filtros) -> list[dict]
     def marcar_contato(self, cid, observacao) -> datetime
 ```

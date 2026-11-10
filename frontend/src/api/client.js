@@ -83,6 +83,7 @@ export const api = {
   contato: (id, observacao) => request("POST", `/clientes/${id}/contato`, observacao ? { observacao } : {}),
   fila: (filtros) => request("GET", "/atendimentos/fila" + qs(filtros)),
   insightsProduto: () => request("GET", "/insights/produto"),
+  visaoGestor: () => request("GET", "/gestor/visao"),
   perguntar: (pergunta) => request("POST", "/agente/perguntar", { pergunta }),
   baixarRelatorio: (papel, formato, filtros) => baixar(`/relatorios/${papel}.${formato}${papel === "analista" ? qs(filtros) : ""}`, `relatorio-${papel}.${formato}`),
 };

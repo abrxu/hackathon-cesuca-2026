@@ -182,6 +182,22 @@ def test_permissoes_relatorios_e_insights(client):
     assert client.get("/api/relatorios/analista.xlsx", headers=ha).status_code == 200
 
 
+def test_visao_gestor(client):
+    ha = _login(client, "analista@radar.local")
+    hg = _login(client, "gestor@radar.local")
+    assert client.get("/api/gestor/visao", headers=ha).status_code == 403
+    client.post("/api/clientes/C001/contato", json={}, headers=ha)
+    d = client.get("/api/gestor/visao", headers=hg).json()
+    k = d["kpis"]
+    assert k["total_clientes"] == 2 and k["clientes_em_risco"] == 1 and k["clientes_alto_risco"] == 1
+    assert k["alto_risco_contatados"] == 1 and d["cobertura"]["sem_contato"] == []
+    assert d["cobertura"]["por_pessoa"][0]["contatos"] >= 1
+    assert {g["valor"] for g in d["segmentos"]["porte"]} == {"Média", "Micro"}
+    assert d["backlog"]["pendentes"] == 1 and sum(f["total"] for f in d["backlog"]["faixas"]) == 1
+    assert d["produto"]["servicos"] == ["Portal Web", "Sistema Alfa"]
+    assert d["evolucao"][-1]["mes"] == "2026-09"
+
+
 def test_agente_e_modelo(client):
     h = _login(client, "gestor@radar.local")
     assert client.post("/api/agente/perguntar", json={"pergunta": "oi"}, headers=h).json()["fonte"] == "regras"
