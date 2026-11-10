@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
+import { ClayIcon, MiniArea, MiniBarras, PERFIL_CORES } from "../components/painelVisual.jsx";
 import { ErrorState, PageHeader, ScoreBar, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
 
 export default function Painel() {
@@ -15,7 +16,7 @@ export default function Painel() {
         <ErrorState error={error} onRetry={reload} />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-          <Kpis kpis={data?.kpis} loading={loading} />
+          <Kpis kpis={data?.kpis} series={data?.series} loading={loading} />
           <Prioridade itens={data?.prioridade_hoje} loading={loading} />
           <div className="flex flex-col gap-6">
             <Distribuicao dist={data?.distribuicao} perfis={data?.perfis} loading={loading} />
@@ -27,32 +28,72 @@ export default function Painel() {
   );
 }
 
-function Kpis({ kpis, loading }) {
+function Kpis({ kpis, series, loading }) {
   const variacao = kpis?.clientes_alto_risco_variacao;
+  const meses = series?.meses ?? [];
   const itens = [
     {
       label: "Clientes em alto risco",
+      icone: "alerta",
       valor: fmt.num(kpis?.clientes_alto_risco),
       detalhe: Number.isFinite(variacao) ? `${variacao > 0 ? "+" : ""}${variacao} vs ago` : null,
       ruim: variacao > 0,
+      destaque: "text-risk-alto",
+      to: "/clientes?faixa=alto",
+      grafico: <MiniBarras valores={series?.alto_risco ?? []} meses={meses.slice(-2)} cor="bg-risk-alto" />,
     },
-    { label: "Chamados pendentes", valor: fmt.num(kpis?.atendimentos_pendentes), detalhe: `${fmt.num(kpis?.pendentes_prioridade_alta)} de prioridade alta` },
-    { label: "Satisfação média", valor: fmt.nota(kpis?.satisfacao_media), detalhe: "de 5" },
-    { label: "Tempo médio de resolução", valor: fmt.minutos(kpis?.tempo_medio_resolucao_min), detalhe: "chamados resolvidos" },
+    {
+      label: "Chamados pendentes",
+      icone: "chamado",
+      valor: fmt.num(kpis?.atendimentos_pendentes),
+      detalhe: `${fmt.num(kpis?.pendentes_prioridade_alta)} de prioridade alta`,
+      to: "/chamados",
+      grafico: <MiniBarras valores={series?.pendentes ?? []} meses={meses} cor="bg-ink" />,
+    },
+    {
+      label: "Satisfação média",
+      icone: "satisfacao",
+      valor: fmt.nota(kpis?.satisfacao_media),
+      detalhe: "de 5",
+      grafico: <MiniArea valores={series?.satisfacao ?? []} meses={meses} cor="text-risk-atencao" formatar={fmt.nota} />,
+    },
+    {
+      label: "Tempo médio de resolução",
+      icone: "tempo",
+      valor: fmt.minutos(kpis?.tempo_medio_resolucao_min),
+      detalhe: "chamados resolvidos",
+      grafico: <MiniArea valores={series?.tempo_resolucao_min ?? []} meses={meses} cor="text-ink-soft" formatar={fmt.minutos} />,
+    },
   ];
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-ink bg-ink lg:col-span-2 lg:grid-cols-4">
-      {itens.map((k, i) => (
-        <div key={k.label} className="bg-surface px-5 py-4">
-          <p className="text-sm font-semibold text-ink-soft">{k.label}</p>
-          {loading ? (
-            <Skeleton className="mt-2 h-10 w-20" />
-          ) : (
-            <p className={`mt-2 font-display text-[40px] ${i === 0 ? "text-risk-alto" : ""}`}>{k.valor}</p>
-          )}
-          <p className={`mt-2 text-sm ${k.ruim ? "font-bold text-risk-alto" : "text-ink-soft"}`}>{loading ? " " : k.detalhe}</p>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-2 lg:grid-cols-4">
+      {itens.map((k) => {
+        const corpo = (
+          <>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-ink-soft">{k.label}</p>
+                {loading ? (
+                  <Skeleton className="mt-2 h-10 w-20" />
+                ) : (
+                  <p className={`mt-2 font-display text-[40px] ${k.destaque ?? ""}`}>{k.valor}</p>
+                )}
+                <p className={`mt-2 text-sm ${k.ruim ? "font-bold text-risk-alto" : "text-ink-soft"}`}>{loading ? "\u00a0" : k.detalhe}</p>
+              </div>
+              <ClayIcon tipo={k.icone} />
+            </div>
+            <div className="mt-4 border-t border-line pt-3">{loading ? <Skeleton className="h-[62px] w-full" /> : k.grafico}</div>
+          </>
+        );
+        const base = "block rounded-panel border border-ink bg-surface px-5 py-4 shadow-[0_1px_0_rgba(15,23,42,0.04)]";
+        return k.to ? (
+          <Link key={k.label} to={k.to} className={`${base} transition hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(15,23,42,0.25)]`}>
+            {corpo}
+          </Link>
+        ) : (
+          <div key={k.label} className={base}>{corpo}</div>
+        );
+      })}
     </div>
   );
 }
@@ -119,24 +160,37 @@ function Distribuicao({ dist, perfis, loading }) {
               ) : null,
             )}
           </div>
-          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-base">
+          <ul className="mt-3 flex flex-wrap gap-2 text-base">
             {ordem.map((f) => (
               <li key={f}>
-                <Link to={`/clientes?faixa=${f}`} className="hover:underline">
-                  <span className={`mr-1.5 inline-block size-3 rounded-sm align-[-1px] ${faixaClasses(f).bg}`} aria-hidden />
-                  <span className="font-bold">{fmt.num(dist?.[f])}</span> {FAIXA_LABEL[f].toLowerCase()}
+                <Link to={`/clientes?faixa=${f}`} className="group inline-flex items-center rounded-control px-2 py-1 -mx-1 hover:bg-brand-soft">
+                  <span className={`mr-1.5 inline-block size-3 rounded-sm ${faixaClasses(f).bg}`} aria-hidden />
+                  <span className="font-bold">{fmt.num(dist?.[f])}</span>&nbsp;{FAIXA_LABEL[f].toLowerCase()}
+                  <span className="ml-1 text-ink-faint transition group-hover:translate-x-0.5" aria-hidden>›</span>
                 </Link>
               </li>
             ))}
           </ul>
-          <ul className="mt-3 flex flex-wrap gap-2 border-t border-ink pt-3 text-sm">
-            {Object.keys(PERFIL_LABEL).map((p) => (
-              <li key={p}>
-                <Link to={`/clientes?perfil=${p}`} className="inline-flex gap-1.5 rounded-full border border-ink bg-canvas px-2.5 py-0.5 text-sm font-semibold text-ink hover:underline">
-                  {PERFIL_LABEL[p]} <span>{fmt.num(perfis?.[p])}</span>
-                </Link>
-              </li>
-            ))}
+          <p className="mt-3 border-t border-ink pt-3 text-sm font-semibold text-ink-soft">Perfis de risco</p>
+          <ul className="mt-2 flex flex-wrap gap-2 text-sm">
+            {Object.keys(PERFIL_LABEL).map((p) => {
+              const c = PERFIL_CORES[p];
+              return (
+                <li key={p}>
+                  <Link
+                    to={`/clientes?perfil=${p}`}
+                    title={`Ver clientes com perfil ${PERFIL_LABEL[p]}`}
+                    className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 font-semibold shadow-[0_2px_0_0_var(--sombra)] transition hover:-translate-y-0.5 hover:shadow-[0_4px_0_0_var(--sombra)] active:translate-y-0 active:shadow-none"
+                    style={{ background: c.fundo, borderColor: c.borda, color: c.texto, "--sombra": c.borda }}
+                  >
+                    <span className="size-2.5 shrink-0 rounded-full" style={{ background: c.ponto }} aria-hidden />
+                    <span>{PERFIL_LABEL[p]}</span>
+                    <span className="rounded-full bg-surface px-2 text-xs font-bold tabular-nums">{fmt.num(perfis?.[p])}</span>
+                    <span className="transition group-hover:translate-x-0.5" aria-hidden>›</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

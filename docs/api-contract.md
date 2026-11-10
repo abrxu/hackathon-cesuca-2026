@@ -83,12 +83,20 @@ Usuários de teste ficam no seed do banco e no README.
     "satisfacao_media": 3.6,
     "tempo_medio_resolucao_min": 252
   },
+  "series": {
+    "meses": ["2026-07", "2026-08", "2026-09"],
+    "alto_risco": [3, 10],
+    "pendentes": [15, 9, 16],
+    "satisfacao": [4.0, 3.6, 3.9],
+    "tempo_resolucao_min": [109, 120, 113]
+  },
   "distribuicao": { "alto": 14, "atencao": 26, "saudavel": 60 },
   "perfis": { "silencioso": 11, "frustrado": 9, "travado": 6, "saudavel": 74 },
   "prioridade_hoje": [ /* ClienteResumo[], top 5 */ ],
   "atendimentos_por_servico": [ { "servico": "Sistema Alfa", "total": 92, "pendentes": 14 } ]
 }
 ```
+`series` alimenta os mini gráficos dos KPIs. `pendentes`, `satisfacao` e `tempo_resolucao_min` agrupam os atendimentos pelo mês de abertura (últimos 3 meses; média `null` se o mês não tiver valor). `alto_risco` tem 2 pontos, ago → set: `[clientes_alto_risco - clientes_alto_risco_variacao, clientes_alto_risco]`. Em erro, as listas vêm vazias.
 
 ### `GET /clientes`
 Query (todos opcionais): `busca`, `faixa`, `perfil`, `porte`, `setor`, `cidade`, `servico`, `ordenar` (`prioridade` padrão | `score` | `nome`), `direcao` (`desc` padrão | `asc`).

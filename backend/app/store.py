@@ -198,11 +198,37 @@ class Store:
                 "satisfacao_media": round(sum(sats) / len(sats), 1) if sats else None,
                 "tempo_medio_resolucao_min": round(sum(tempos) / len(tempos)) if tempos else None,
             },
+            "series": self._series_mensais(variacao, distrib.get("alto", 0)),
             "distribuicao": distrib,
             "perfis": perfis,
             "prioridade_hoje": top,
             "atendimentos_por_servico": sorted(servicos.values(), key=lambda s: s["servico"]),
         }
+
+    def _series_mensais(self, variacao: int, alto_hoje: int) -> dict:
+        """Séries por mês de abertura (últimos 3 meses) para os mini gráficos do painel."""
+        try:
+            meses = sorted({a.data_abertura.strftime("%Y-%m") for a in self.ds.atendimentos if a.data_abertura})[-3:]
+            por_mes = {m: [] for m in meses}
+            for a in self.ds.atendimentos:
+                m = a.data_abertura.strftime("%Y-%m") if a.data_abertura else None
+                if m in por_mes:
+                    por_mes[m].append(a)
+
+            def media(vals, casas=1):
+                vals = [v for v in vals if v is not None]
+                return round(sum(vals) / len(vals), casas) if vals else None  # casas=None -> int
+
+            return {
+                "meses": meses,
+                "alto_risco": [max(alto_hoje - (variacao or 0), 0), alto_hoje],
+                "pendentes": [sum(1 for a in por_mes[m] if a.status == "Pendente") for m in meses],
+                "satisfacao": [media([a.satisfacao for a in por_mes[m]]) for m in meses],
+                "tempo_resolucao_min": [media([a.tempo_resolucao_min for a in por_mes[m]], None) for m in meses],
+            }
+        except Exception:
+            log.exception("falha ao montar séries do painel")
+            return {"meses": [], "alto_risco": [], "pendentes": [], "satisfacao": [], "tempo_resolucao_min": []}
 
     def _variacao_alto_risco(self) -> int:
         """Aproximação: clientes em alto risco hoje menos os que já estavam em alto risco
