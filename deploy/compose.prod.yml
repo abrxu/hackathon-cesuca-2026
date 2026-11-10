@@ -46,6 +46,9 @@ services:
     container_name: hackathon-frontend
     restart: unless-stopped
     depends_on: [backend]
+    volumes:
+      # Slides do pitch em hackathon.abrxu.com/slides
+      - "../docs/pitch-guia.html:/usr/share/nginx/html/slides/index.html:ro"
     networks: [proxy]
 
 volumes:
