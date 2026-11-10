@@ -1,71 +1,41 @@
-// Elementos visuais do Painel: ícones "clay" (3D suave, em SVG puro) e mini gráficos dos KPIs.
+// Elementos visuais do Painel: ícones de linha e mini gráficos dos KPIs.
 import { useId } from "react";
 import { fmt } from "../api/format.js";
 
-// Paleta dos ícones clay: tom claro (luz), tom base e tom escuro (sombra).
-const CLAY = {
-  alerta: { luz: "#FCA5A5", base: "#EF4444", sombra: "#B91C1C" },
-  chamado: { luz: "#93C5FD", base: "#3B82F6", sombra: "#1D4ED8" },
-  satisfacao: { luz: "#FDE68A", base: "#FBBF24", sombra: "#D97706" },
-  tempo: { luz: "#C4B5FD", base: "#8B5CF6", sombra: "#6D28D9" },
+// Ícones de linha dos KPIs, no mesmo traço do símbolo do Radar (contorno fino, pontas arredondadas).
+const ICONES = {
+  alerta: (
+    <>
+      <path d="M20 7.5 33.5 31.5H6.5Z" />
+      <path d="M20 16.5v7" />
+      <circle cx="20" cy="27" r="0.6" fill="currentColor" />
+    </>
+  ),
+  chamado: (
+    <>
+      <path d="M8 9.5h24a2.5 2.5 0 0 1 2.5 2.5v13a2.5 2.5 0 0 1-2.5 2.5H18l-6.5 5v-5H8A2.5 2.5 0 0 1 5.5 25V12A2.5 2.5 0 0 1 8 9.5Z" />
+      <path d="M12 16h16M12 21h10" />
+    </>
+  ),
+  satisfacao: (
+    <>
+      <path d="m20 6.5 4.1 8.4 9.2 1.3-6.7 6.5 1.6 9.2L20 27.6l-8.2 4.3 1.6-9.2-6.7-6.5 9.2-1.3Z" />
+    </>
+  ),
+  tempo: (
+    <>
+      <circle cx="20" cy="20" r="13" />
+      <path d="M20 13v7l5 3" />
+    </>
+  ),
 };
 
-export function ClayIcon({ tipo, size = 56 }) {
-  const id = useId().replace(/:/g, "");
-  const c = CLAY[tipo] ?? CLAY.chamado;
-  const g = `clay-${id}`;
+export function KpiIcon({ tipo, size = 32, className = "text-ink" }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden className="shrink-0 drop-shadow-[0_6px_8px_rgba(15,23,42,0.18)]">
-      <defs>
-        <radialGradient id={`${g}-corpo`} cx="35%" cy="28%" r="80%">
-          <stop offset="0%" stopColor={c.luz} />
-          <stop offset="55%" stopColor={c.base} />
-          <stop offset="100%" stopColor={c.sombra} />
-        </radialGradient>
-        <radialGradient id={`${g}-branco`} cx="38%" cy="30%" r="75%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="70%" stopColor="#F1F5F9" />
-          <stop offset="100%" stopColor="#CBD5E1" />
-        </radialGradient>
-        <radialGradient id={`${g}-brilho`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      {tipo === "alerta" && (
-        <>
-          <path d="M32 7c2.6 0 4.3 1.4 5.6 3.6l19 33c2.6 4.5-.3 9.4-5.4 9.4H12.8c-5.1 0-8-4.9-5.4-9.4l19-33C27.7 8.4 29.4 7 32 7Z" fill={`url(#${g}-corpo)`} />
-          <rect x="28.5" y="20" width="7" height="18" rx="3.5" fill={`url(#${g}-branco)`} />
-          <circle cx="32" cy="45" r="4" fill={`url(#${g}-branco)`} />
-          <ellipse cx="25" cy="22" rx="5" ry="3" fill={`url(#${g}-brilho)`} transform="rotate(-55 25 22)" />
-        </>
-      )}
-      {tipo === "chamado" && (
-        <>
-          <path d="M14 10h36c5 0 8 3 8 8v20c0 5-3 8-8 8H30l-11 9c-1.6 1.3-3.5.3-3.3-1.7l.7-7.3H14c-5 0-8-3-8-8V18c0-5 3-8 8-8Z" fill={`url(#${g}-corpo)`} />
-          <rect x="15" y="20" width="26" height="5.5" rx="2.75" fill={`url(#${g}-branco)`} />
-          <rect x="15" y="30" width="18" height="5.5" rx="2.75" fill={`url(#${g}-branco)`} />
-          <ellipse cx="17" cy="14.5" rx="7" ry="2.6" fill={`url(#${g}-brilho)`} />
-        </>
-      )}
-      {tipo === "satisfacao" && (
-        <>
-          <path d="M32 5.5c1.6 0 2.8.9 3.5 2.4l6 12.2 13.4 2c3.3.5 4.6 4.5 2.2 6.8l-9.7 9.4 2.3 13.3c.6 3.3-2.9 5.8-5.8 4.2L32 49.5l-11.9 6.3c-3 1.6-6.4-.9-5.8-4.2l2.3-13.3-9.7-9.4c-2.4-2.3-1.1-6.3 2.2-6.8l13.4-2 6-12.2c.7-1.5 1.9-2.4 3.5-2.4Z" fill={`url(#${g}-corpo)`} />
-          <circle cx="26" cy="31" r="2.6" fill={c.sombra} />
-          <circle cx="38" cy="31" r="2.6" fill={c.sombra} />
-          <path d="M26.5 38.5c3.2 3 7.8 3 11 0" stroke={c.sombra} strokeWidth="2.6" strokeLinecap="round" fill="none" />
-          <ellipse cx="27" cy="17" rx="5" ry="2.4" fill={`url(#${g}-brilho)`} transform="rotate(-30 27 17)" />
-        </>
-      )}
-      {tipo === "tempo" && (
-        <>
-          <circle cx="32" cy="33" r="25" fill={`url(#${g}-corpo)`} />
-          <circle cx="32" cy="33" r="17.5" fill={`url(#${g}-branco)`} />
-          <path d="M32 22v11.5l7.5 4.5" stroke={c.sombra} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          <circle cx="32" cy="33.5" r="2.6" fill={c.sombra} />
-          <ellipse cx="21" cy="17" rx="7" ry="3" fill={`url(#${g}-brilho)`} transform="rotate(-35 21 17)" />
-        </>
-      )}
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className={`shrink-0 ${className}`}>
+      <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        {ICONES[tipo] ?? ICONES.chamado}
+      </g>
     </svg>
   );
 }

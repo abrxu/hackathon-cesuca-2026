@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth.jsx";
 import { api } from "../api/client.js";
 import { FAIXA_LABEL, PERFIL_LABEL, fmt } from "../api/format.js";
-import { ClayIcon, MiniArea, MiniBarras, PERFIL_CORES } from "../components/painelVisual.jsx";
+import { KpiIcon, MiniArea, MiniBarras, PERFIL_CORES } from "../components/painelVisual.jsx";
 import { ErrorState, PageHeader, ScoreBar, Section, Skeleton, SkeletonRows, faixaClasses, useData } from "../components/ui.jsx";
 
 export default function Painel() {
@@ -80,7 +80,7 @@ function Kpis({ kpis, series, loading }) {
                 )}
                 <p className={`mt-2 text-sm ${k.ruim ? "font-bold text-risk-alto" : "text-ink-soft"}`}>{loading ? "\u00a0" : k.detalhe}</p>
               </div>
-              <ClayIcon tipo={k.icone} />
+              <KpiIcon tipo={k.icone} />
             </div>
             <div className="mt-4 border-t border-line pt-3">{loading ? <Skeleton className="h-[62px] w-full" /> : k.grafico}</div>
           </>
