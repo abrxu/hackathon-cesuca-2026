@@ -107,10 +107,12 @@ export function MiniBarras({ valores = [], meses = [], cor = "bg-ink", formatar 
   );
 }
 
-// Cores próprias de cada perfil de risco (distintas das cores de faixa).
+// Cores de cada perfil, derivadas da paleta oficial (sem HEX novos): tinta clara de fundo,
+// borda e ponto na cor de origem, texto sempre em azul-noite (contraste AA).
+const tom = (cor, pct) => `color-mix(in srgb, var(--color-${cor}) ${pct}%, var(--color-surface))`;
 export const PERFIL_CORES = {
-  silencioso: { fundo: "#E0F2FE", borda: "#0284C7", texto: "#075985", ponto: "#0284C7" },
-  frustrado: { fundo: "#FCE7F3", borda: "#DB2777", texto: "#9D174D", ponto: "#DB2777" },
-  travado: { fundo: "#EDE9FE", borda: "#7C3AED", texto: "#5B21B6", ponto: "#7C3AED" },
-  saudavel: { fundo: "#CCFBF1", borda: "#0D9488", texto: "#115E59", ponto: "#0D9488" },
+  silencioso: { fundo: tom("ink", 7), borda: tom("ink", 55), ponto: "var(--color-ink-faint)" },
+  frustrado: { fundo: tom("risk-alto", 9), borda: tom("risk-alto", 55), ponto: "var(--color-risk-alto)" },
+  travado: { fundo: tom("risk-atencao", 11), borda: tom("risk-atencao", 60), ponto: "var(--color-risk-atencao)" },
+  saudavel: { fundo: tom("risk-saudavel", 9), borda: tom("risk-saudavel", 55), ponto: "var(--color-risk-saudavel)" },
 };

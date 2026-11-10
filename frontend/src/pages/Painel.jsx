@@ -180,13 +180,13 @@ function Distribuicao({ dist, perfis, loading }) {
                   <Link
                     to={`/clientes?perfil=${p}`}
                     title={`Ver clientes com perfil ${PERFIL_LABEL[p]}`}
-                    className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 font-semibold shadow-[0_2px_0_0_var(--sombra)] transition hover:-translate-y-0.5 hover:shadow-[0_4px_0_0_var(--sombra)] active:translate-y-0 active:shadow-none"
-                    style={{ background: c.fundo, borderColor: c.borda, color: c.texto, "--sombra": c.borda }}
+                    className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 font-semibold text-ink shadow-[0_1px_2px_color-mix(in_srgb,var(--color-ink)_12%,transparent)] transition hover:-translate-y-0.5 hover:border-ink hover:shadow-[0_6px_14px_-6px_color-mix(in_srgb,var(--color-ink)_35%,transparent)] active:translate-y-0 active:shadow-none"
+                    style={{ background: c.fundo, borderColor: c.borda }}
                   >
                     <span className="size-2.5 shrink-0 rounded-full" style={{ background: c.ponto }} aria-hidden />
                     <span>{PERFIL_LABEL[p]}</span>
-                    <span className="rounded-full bg-surface px-2 text-xs font-bold tabular-nums">{fmt.num(perfis?.[p])}</span>
-                    <span className="transition group-hover:translate-x-0.5" aria-hidden>›</span>
+                    <span className="rounded-full border border-line bg-surface px-2 text-xs font-bold tabular-nums">{fmt.num(perfis?.[p])}</span>
+                    <span className="text-ink-faint transition group-hover:translate-x-0.5 group-hover:text-ink" aria-hidden>›</span>
                   </Link>
                 </li>
               );
