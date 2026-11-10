@@ -102,7 +102,7 @@ def relatorio_analista_pdf(store, filtros: dict) -> bytes
 def relatorio_gestor_xlsx(store) -> bytes
 def relatorio_gestor_pdf(store) -> bytes
 ```
-`openpyxl` e `reportlab`.
+`openpyxl` e `reportlab`. Os PDFs seguem a identidade visual do sistema (paleta de `frontend/src/index.css`: azul-noite, vermelho/âmbar/verde de risco, roxo da IA; faixa de marca no topo, rodapé com data e página, fonte Helvetica por ser embutida no PDF). Se os tokens do frontend mudarem, atualizar as constantes de cor no início do bloco PDF de `reports.py`.
 
 ## `Store` (em `app/store.py`, frente 2)
 

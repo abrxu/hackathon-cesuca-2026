@@ -10,7 +10,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
@@ -95,39 +95,138 @@ def relatorio_analista_xlsx(store, filtros: dict) -> bytes:
     return _bytes_wb(wb)
 
 
-def _tabela_pdf(data, widths=None, fs=7):
-    t = Table(data, colWidths=widths, repeatRows=1)
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1F2937")), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("FONTSIZE", (0, 0), (-1, -1), fs), ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F3F4F6")]),
-        ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#D1D5DB")), ("VALIGN", (0, 0), (-1, -1), "TOP"),
-    ]))
-    return t
+# ---- PDF: mesma identidade visual do sistema (tokens de frontend/src/index.css) ----
+INK = colors.HexColor("#0F172A")
+CANVAS = colors.HexColor("#F8FAFC")
+SURFACE = colors.HexColor("#FDFEFF")
+RISCO_ALTO = colors.HexColor("#DC2626")
+RISCO_ATENCAO = colors.HexColor("#D97706")
+RISCO_SAUDAVEL = colors.HexColor("#059669")
+IA = colors.HexColor("#4F46E5")
+
+
+def _mix(cor, pct, base=SURFACE):
+    """Equivale ao color-mix(in srgb, cor pct%, base) do CSS."""
+    p = pct / 100
+    return colors.Color(cor.red * p + base.red * (1 - p), cor.green * p + base.green * (1 - p),
+                        cor.blue * p + base.blue * (1 - p))
+
+
+INK_FAINT = _mix(INK, 64, CANVAS)
+LINE = _mix(INK, 20, CANVAS)
+ALTO_SOFT, ATENCAO_SOFT, SAUDAVEL_SOFT = _mix(RISCO_ALTO, 10), _mix(RISCO_ATENCAO, 12), _mix(RISCO_SAUDAVEL, 10)
+IA_SOFT = _mix(IA, 7)
+FAIXA_LABEL = {"alto": "Alto risco", "atencao": "Atenção", "saudavel": "Saudável"}
+PERFIL_LABEL = {"silencioso": "Silencioso", "frustrado": "Frustrado", "travado": "Travado", "saudavel": "Saudável"}
+FONT, FONT_B = "Helvetica", "Helvetica-Bold"
+
+
+def _estilos():
+    def st(nome, **kw):
+        return ParagraphStyle(nome, fontName=kw.pop("fontName", FONT), textColor=kw.pop("textColor", INK), **kw)
+
+    return {
+        "titulo": st("titulo", fontName=FONT_B, fontSize=22, leading=26, spaceAfter=2),
+        "meta": st("meta", fontSize=9, leading=12, textColor=INK_FAINT),
+        "h2": st("h2", fontName=FONT_B, fontSize=13, leading=16, spaceBefore=14, spaceAfter=6, keepWithNext=1),
+        "corpo": st("corpo", fontSize=10, leading=14),
+        "cel": st("cel", fontSize=7.5, leading=9.5),
+        "cel_b": st("cel_b", fontName=FONT_B, fontSize=7.5, leading=9.5),
+        "cab": st("cab", fontName=FONT_B, fontSize=7.5, leading=9.5, textColor=CANVAS),
+        "kpi_n": st("kpi_n", fontName=FONT_B, fontSize=22, leading=24, alignment=1),
+        "kpi_r": st("kpi_r", fontSize=7.5, leading=9.5, textColor=INK_FAINT, alignment=1),
+    }
+
+
+def _esc(x) -> str:
+    return str(_v(x)).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def _cell(x, st):
-    return Paragraph(str(_v(x)).replace("&", "&amp;").replace("<", "&lt;"), st)
+    return Paragraph(_esc(x), st)
 
 
-def _pdf(story, pagesize) -> bytes:
+def _tabela_pdf(cab, linhas, widths, est, faixa_col=None, faixas=None, bold_cols=()):
+    """Tabela no estilo do sistema: cabeçalho azul-noite, linhas claras com divisória fina.
+    faixa_col/faixas pintam a coluna da faixa como a pílula de risco da interface."""
+    data = [[_cell(c, est["cab"]) for c in cab]]
+    for r in linhas:
+        data.append([_cell(v, est["cel_b"] if j in bold_cols else est["cel"]) for j, v in enumerate(r)])
+    cmds = [
+        ("BACKGROUND", (0, 0), (-1, 0), INK),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [SURFACE, CANVAS]),
+        ("LINEBELOW", (0, 1), (-1, -1), 0.4, LINE),
+        ("BOX", (0, 0), (-1, -1), 0.6, LINE),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+    ]
+    if faixa_col is not None and faixas:
+        for i, f in enumerate(faixas, 1):
+            if f == "alto":  # vermelho sólido, texto claro (AA)
+                cmds.append(("BACKGROUND", (faixa_col, i), (faixa_col, i), RISCO_ALTO))
+                data[i][faixa_col] = Paragraph(_esc(FAIXA_LABEL["alto"]),
+                                               ParagraphStyle("fa", parent=est["cel_b"], textColor=colors.white))
+            else:  # fundo suave + texto azul-noite
+                soft = ATENCAO_SOFT if f == "atencao" else SAUDAVEL_SOFT
+                cor = RISCO_ATENCAO if f == "atencao" else RISCO_SAUDAVEL
+                cmds += [("BACKGROUND", (faixa_col, i), (faixa_col, i), soft),
+                         ("LINEBEFORE", (faixa_col, i), (faixa_col, i), 2.5, cor)]
+                data[i][faixa_col] = _cell(FAIXA_LABEL.get(f, f), est["cel_b"])
+    t = Table(data, colWidths=widths, repeatRows=1)
+    t.setStyle(TableStyle(cmds))
+    return t
+
+
+def _decorar(canvas, doc):
+    """Faixa de marca no topo e rodapé com paginação, em todas as páginas."""
+    w, h = doc.pagesize
+    canvas.saveState()
+    canvas.setFillColor(INK)
+    canvas.rect(0, h - 0.9 * cm, w, 0.9 * cm, stroke=0, fill=1)
+    canvas.setFillColor(CANVAS)
+    canvas.setFont(FONT_B, 9)
+    canvas.drawString(1.5 * cm, h - 0.58 * cm, "Radar de Clientes")
+    canvas.setFont(FONT, 8)
+    canvas.drawRightString(w - 1.5 * cm, h - 0.58 * cm, "Customer Success")
+    canvas.setStrokeColor(LINE)
+    canvas.setLineWidth(0.5)
+    canvas.line(1.5 * cm, 1.1 * cm, w - 1.5 * cm, 1.1 * cm)
+    canvas.setFillColor(INK_FAINT)
+    canvas.setFont(FONT, 8)
+    canvas.drawString(1.5 * cm, 0.7 * cm, f"Gerado em {datetime.now():%d/%m/%Y %H:%M}")
+    canvas.drawRightString(w - 1.5 * cm, 0.7 * cm, f"Página {doc.page}")
+    canvas.restoreState()
+
+
+def _pdf(story, pagesize, titulo="Relatório") -> bytes:
     b = io.BytesIO()
-    SimpleDocTemplate(b, pagesize=pagesize, leftMargin=1.5 * cm, rightMargin=1.5 * cm, topMargin=1.5 * cm,
-                      bottomMargin=1.5 * cm, title="Relatório").build(story)
+    doc = SimpleDocTemplate(b, pagesize=pagesize, leftMargin=1.5 * cm, rightMargin=1.5 * cm, topMargin=2.0 * cm,
+                            bottomMargin=1.8 * cm, title=titulo, author="Radar de Clientes")
+    doc.build(story, onFirstPage=_decorar, onLaterPages=_decorar)
     return b.getvalue()
 
 
 def relatorio_analista_pdf(store, filtros: dict) -> bytes:
     cab, rows = _linhas_analista(store, filtros)
-    ss = getSampleStyleSheet()
-    small = ss["BodyText"].clone("small", fontSize=7, leading=8.5)
-    story = [Paragraph("Relatório do analista: carteira e riscos", ss["Title"]),
-             Paragraph(f"Gerado em {datetime.now():%d/%m/%Y %H:%M} | {len(rows)} clientes", ss["BodyText"]), Spacer(1, 8)]
-    pdf_cab = [c for c in cab if c not in ("Setor", "Porte")]
+    est = _estilos()
+    story = [Paragraph("Relatório do analista", est["titulo"]),
+             Paragraph(f"Carteira e riscos | {len(rows)} clientes", est["meta"]), Spacer(1, 10)]
+    pdf_cab = ["Cliente", "Cidade", "Score", "Faixa", "Perfil", "Engajamento", "Atrito", "Satisfação",
+               "Motivo principal", "Contatado em"]
     idx = [cab.index(c) for c in pdf_cab]
-    data = [pdf_cab] + [[_cell(r[i], small) for i in idx] for r in rows]
-    story.append(_tabela_pdf(data))
-    return _pdf(story, landscape(A4))
+    linhas = []
+    for r in rows:
+        l = [r[i] for i in idx]
+        l[4] = PERFIL_LABEL.get(l[4], l[4])
+        linhas.append(l)
+    widths = [4.6 * cm, 2.4 * cm, 1.4 * cm, 2.3 * cm, 2.2 * cm, 2.1 * cm, 1.6 * cm, 2.0 * cm, 5.0 * cm, 3.1 * cm]
+    if linhas:
+        story.append(_tabela_pdf(pdf_cab, linhas, widths, est, faixa_col=3,
+                                 faixas=[r[cab.index("Faixa")] for r in rows], bold_cols=(0, 2)))
+    else:
+        story.append(Paragraph("Nenhum cliente para os filtros selecionados.", est["corpo"]))
+    return _pdf(story, landscape(A4), "Relatório do analista")
 
 
 def relatorio_gestor_xlsx(store) -> bytes:
@@ -159,34 +258,57 @@ def relatorio_gestor_xlsx(store) -> bytes:
     return _bytes_wb(wb)
 
 
+def _kpis_pdf(k, est, largura):
+    itens = [("Clientes em alto risco", k.get("clientes_alto_risco"), RISCO_ALTO),
+             ("Atendimentos pendentes", k.get("atendimentos_pendentes"), INK),
+             ("Pendentes de prioridade alta", k.get("pendentes_prioridade_alta"), INK),
+             ("Satisfação média", k.get("satisfacao_media"), INK),
+             ("Tempo médio de resolução (min)", k.get("tempo_medio_resolucao_min"), INK)]
+    cel = [[[Paragraph(_esc(v), ParagraphStyle("kn", parent=est["kpi_n"], textColor=cor)),
+             Paragraph(n, est["kpi_r"])] for n, v, cor in itens]]
+    t = Table(cel, colWidths=[largura / len(itens)] * len(itens))
+    t.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), CANVAS), ("BOX", (0, 0), (-1, -1), 0.6, LINE),
+        ("INNERGRID", (0, 0), (-1, -1), 0.6, LINE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 10), ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+    ]))
+    return t
+
+
 def relatorio_gestor_pdf(store) -> bytes:
     p, top, ins, resumo = _dados_gestor(store)
     k = p.get("kpis", {})
-    ss = getSampleStyleSheet()
-    small = ss["BodyText"].clone("small", fontSize=8, leading=10)
-    story = [Paragraph("Relatório do gestor", ss["Title"]),
-             Paragraph(f"Gerado em {datetime.now():%d/%m/%Y %H:%M}", ss["BodyText"]), Spacer(1, 8),
-             Paragraph("Resumo executivo", ss["Heading2"]), Paragraph(resumo, ss["BodyText"]), Spacer(1, 8),
-             Paragraph("Indicadores", ss["Heading2"]),
-             _tabela_pdf([["Indicador", "Valor"],
-                          ["Clientes em alto risco", _v(k.get("clientes_alto_risco"))],
-                          ["Atendimentos pendentes", _v(k.get("atendimentos_pendentes"))],
-                          ["Pendentes de prioridade alta", _v(k.get("pendentes_prioridade_alta"))],
-                          ["Satisfação média", _v(k.get("satisfacao_media"))],
-                          ["Tempo médio de resolução (min)", _v(k.get("tempo_medio_resolucao_min"))]], [9 * cm, 4 * cm], 9),
-             Spacer(1, 8), Paragraph("Distribuição por faixa e perfil", ss["Heading2"]),
-             _tabela_pdf([["Faixa", "Clientes"]] + [[a, b] for a, b in (p.get("distribuicao") or {}).items()], [9 * cm, 4 * cm], 9),
-             Spacer(1, 4),
-             _tabela_pdf([["Perfil", "Clientes"]] + [[a, b] for a, b in (p.get("perfis") or {}).items()], [9 * cm, 4 * cm], 9),
-             Spacer(1, 8), Paragraph("Top 10 clientes em risco", ss["Heading2"]),
-             _tabela_pdf([["Cliente", "Score", "Perfil", "Motivo"]] +
-                         [[_cell(i.get("nome"), small), _v(i.get("score")), _v(i.get("perfil")), _cell(i.get("motivo_principal"), small)] for i in top],
-                         [5 * cm, 1.5 * cm, 2.5 * cm, 8 * cm], 8),
-             Spacer(1, 8), Paragraph("Insights de produto", ss["Heading2"])]
-    if ins:
-        story.append(_tabela_pdf([["Serviço", "Assunto", "Atend.", "Descrição"]] +
-                                 [[_cell(i.get("servico"), small), _cell(i.get("assunto"), small), _v(i.get("atendimentos")),
-                                   _cell(i.get("descricao"), small)] for i in ins[:8]], [3 * cm, 3 * cm, 1.5 * cm, 9.5 * cm], 8))
+    est = _estilos()
+    larg = 18 * cm
+    # Resumo executivo: caixa na cor da IA, como o copiloto na interface.
+    caixa = Table([[Paragraph(_esc(resumo), est["corpo"])]], colWidths=[larg])
+    caixa.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), IA_SOFT), ("LINEBEFORE", (0, 0), (0, -1), 3, IA),
+                               ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                               ("TOPPADDING", (0, 0), (-1, -1), 9), ("BOTTOMPADDING", (0, 0), (-1, -1), 9)]))
+    dist = [[FAIXA_LABEL.get(a, a), b] for a, b in (p.get("distribuicao") or {}).items()]
+    perf = [[PERFIL_LABEL.get(a, a), b] for a, b in (p.get("perfis") or {}).items()]
+    lado = Table([[_tabela_pdf(["Faixa", "Clientes"], dist, [5 * cm, 3.5 * cm], est),
+                   _tabela_pdf(["Perfil", "Clientes"], perf, [5 * cm, 3.5 * cm], est)]], colWidths=[9 * cm, 9 * cm])
+    lado.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                              ("RIGHTPADDING", (0, 0), (0, 0), 6), ("RIGHTPADDING", (1, 0), (1, 0), 0)]))
+    story = [Paragraph("Relatório do gestor", est["titulo"]),
+             Paragraph("Visão para a diretoria", est["meta"]), Spacer(1, 10),
+             Paragraph("Resumo executivo", est["h2"]), caixa,
+             Paragraph("Indicadores", est["h2"]), _kpis_pdf(k, est, larg),
+             Paragraph("Distribuição por faixa e perfil", est["h2"]), lado,
+             Paragraph("Top 10 clientes em risco", est["h2"])]
+    if top:
+        story.append(_tabela_pdf(["Cliente", "Score", "Perfil", "Motivo"],
+                                 [[i.get("nome"), i.get("score"), PERFIL_LABEL.get(i.get("perfil"), i.get("perfil")),
+                                   i.get("motivo_principal")] for i in top],
+                                 [5 * cm, 1.5 * cm, 2.5 * cm, 9 * cm], est, bold_cols=(0, 1)))
     else:
-        story.append(Paragraph("Sem concentração relevante de problemas por serviço.", ss["BodyText"]))
-    return _pdf(story, A4)
+        story.append(Paragraph("Nenhum cliente em alto risco.", est["corpo"]))
+    story.append(Paragraph("Insights de produto", est["h2"]))
+    if ins:
+        story.append(_tabela_pdf(["Serviço", "Assunto", "Atend.", "Descrição"],
+                                 [[i.get("servico"), i.get("assunto"), i.get("atendimentos"), i.get("descricao")]
+                                  for i in ins[:8]], [3 * cm, 3 * cm, 1.5 * cm, 10.5 * cm], est, bold_cols=(0,)))
+    else:
+        story.append(Paragraph("Sem concentração relevante de problemas por serviço.", est["corpo"]))
+    return _pdf(story, A4, "Relatório do gestor")
