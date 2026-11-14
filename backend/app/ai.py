@@ -38,6 +38,9 @@ def _model() -> str:
 
 
 def _client():
+    # AI_MOCK=1 desliga a chamada ao LLM: as respostas saem do fallback por regras (demo pública sem custo).
+    if os.getenv("AI_MOCK", "").strip().lower() in ("1", "true", "yes"):
+        return None
     key = os.getenv("DEEPSEEK_API_KEY", "").strip()
     if not key:
         return None

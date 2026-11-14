@@ -29,6 +29,7 @@ services:
       CORS_ORIGIN: https://hackathon.abrxu.com
       DATA_DIR: /data
       JWT_SECRET: ${JWT_SECRET}
+      AI_MOCK: ${AI_MOCK:-1}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}

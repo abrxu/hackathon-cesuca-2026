@@ -81,7 +81,7 @@ A camada `frontend/src/api/client.js` segue `docs/api-contract.md`. Enquanto uma
 - URL: https://hackathon.abrxu.com (API em `/api`, docs em `/docs`). Logins de demo: `analista@radar.local` e `gestor@radar.local`, senha `radar123`.
 - Todo push na `main` dispara `.github/workflows/deploy.yml`: o Actions conecta na VPS com o usuário `deploy` usando uma chave restrita ao `/opt/hackathon/deploy.sh`, que faz checkout do commit e roda `docker compose -f deploy/compose.prod.yml up -d --build`.
 - Os slides do pitch (`docs/pitch-guia.html`) são servidos em https://hackathon.abrxu.com/slides: o `compose.prod.yml` monta o arquivo no nginx do frontend. Atualizou o HTML, é só dar push na `main`.
-- O `.env` de produção é montado a partir dos secrets do repositório (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `JWT_SECRET`, `DEEPSEEK_API_KEY`); para trocar um valor, altere o secret e rode o workflow de novo (aba Actions → Deploy → Run workflow). Os secrets `DEPLOY_*` guardam a chave SSH e o host.
+- O `.env` de produção é montado a partir dos secrets do repositório (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `JWT_SECRET`); a demo pública roda com `AI_MOCK=1`, então a IA responde pelo fallback por regras e não chama o LLM. Para trocar um valor, altere o secret e rode o workflow de novo (aba Actions → Deploy → Run workflow). Os secrets `DEPLOY_*` guardam a chave SSH e o host.
 - Na VPS, o Caddy compartilhado (`/opt/classbuddy/Caddyfile`) tem o bloco `hackathon.abrxu.com`, apontando para os containers `hackathon-frontend` e `hackathon-backend` na rede `classbuddy_internal`. O DNS passa pelo proxy da Cloudflare.
 
 ## Limitações conhecidas
